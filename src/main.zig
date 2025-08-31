@@ -8,9 +8,6 @@ const stdout = &stdout_writer.interface;
 pub fn main() !void {
     try stdout.print("Hello, {s}!\n", .{"World"});
 
-    var my_array = [_]i32{ 64, 34, 25, 12, 22, 11, 90 };
-    dsa.algorithms.bubble_sort(i32, &my_array);
-
     // Don't forget to flush
     try stdout.flush();
 }

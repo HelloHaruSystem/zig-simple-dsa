@@ -3,7 +3,7 @@
 Practicing data structures and algorithms while getting comfortable with Zig syntax and memory management.
 
 ## Why?
-- Pracice Zig programming fundamentals
+- Practice Zig programming fundamentals
 - Implement everything from scratch to understand the internals
 
 ## Topics to Cover

@@ -32,27 +32,35 @@ test "bubbleSort basic functionality" {
 
 test "bubbleSort empty array" {
     var arr = [_]i32{};
+
     Sorting.bubbleSort(i32, &arr);
+
     try std.testing.expectEqualSlices(i32, &[_]i32{}, &arr);
 }
 
 test "bubbleSort single element" {
     var arr = [_]i32{42};
     const expected = [_]i32{42};
+
     Sorting.bubbleSort(i32, &arr);
+
     try std.testing.expectEqualSlices(i32, &expected, &arr);
 }
 
 test "bubbleSort already sorted" {
     var arr = [_]i32{ 1, 2, 3, 4, 5 };
     const expected = [_]i32{ 1, 2, 3, 4, 5 };
+
     Sorting.bubbleSort(i32, &arr);
+
     try std.testing.expectEqualSlices(i32, &expected, &arr);
 }
 
 test "bubbleSort with duplicates" {
     var arr = [_]i32{ 3, 1, 3, 2, 1 };
     const expected = [_]i32{ 1, 1, 2, 3, 3 };
+
     Sorting.bubbleSort(i32, &arr);
+
     try std.testing.expectEqualSlices(i32, &expected, &arr);
 }

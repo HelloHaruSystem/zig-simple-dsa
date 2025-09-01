@@ -1,19 +1,51 @@
 const std = @import("std");
 
 pub const Sorting = struct {
+    // time complexity worst case O(n^2)
+    // space complexity O(1)
     pub fn bubbleSort(comptime T: type, arr: []T) void {
-        var i: usize = 0;
-        var j: usize = undefined;
+        if (arr.len <= 1) return;
 
-        while (i < arr.len) : (i += 1) {
-            j = 0;
-            while (j < arr.len - 1 - i) : (j += 1) {
-                if (arr[j] > arr[j + 1]) {
-                    const temp = arr[j + 1];
-                    arr[j + 1] = arr[j];
-                    arr[j] = temp;
+        var n = arr.len;
+
+        while (true) {
+            var swapped = false;
+            var i: usize = 0;
+
+            while (i < n - 1) : (i += 1) {
+                if (arr[i] > arr[i + 1]) {
+                    const temp = arr[i + 1];
+                    arr[i + 1] = arr[i];
+                    arr[i] = temp;
+                    swapped = true;
                 }
             }
+
+            // no swap = array is sorted
+            if (!swapped) break;
+
+            n -= 1;
+        }
+    }
+
+    // time complexity worst case O(n log n)
+    // space complexity O(n)
+    pub fn mergeSort(allocator: std.mem.Allocator, comptime T: type, arr: []const T) !void {
+        const n: usize = arr.len;
+
+        // check if array is empty or a single value
+        if (n <= 1) return;
+
+        const midIndex: usize = n / 2;
+        var leftHalf = try allocator.alloc(T, midIndex);
+        var rightHalf = try allocator.alloc(T, n - midIndex);
+
+        // fill arrays
+        for (arr[0..midIndex], 0..) |number, i| {
+            leftHalf[i] = number;
+        }
+        for (arr[midIndex..n], 0..) |number, i| {
+            rightHalf[i] = number;
         }
     }
 };

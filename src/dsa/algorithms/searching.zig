@@ -1,6 +1,8 @@
 const std = @import("std");
 
 pub const Searching = struct {
+    // time complexity worst case O(n)
+    // space complexity O(1)
     pub fn LinearSearch(comptime T: type, arr: []const T, target: T) ?usize {
         for (arr, 0..) |number, i| {
             if (number == target) {
@@ -10,6 +12,8 @@ pub const Searching = struct {
         return null;
     }
 
+    // time complexity worst case O(log n)
+    // space complexity O(1)
     pub fn binarySearch(comptime T: type, arr: []const T, target: T) ?usize {
         if (arr.len == 0) return null;
 

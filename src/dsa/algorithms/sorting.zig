@@ -1,4 +1,5 @@
 const std = @import("std");
+const testing = std.testing;
 
 pub const Sorting = struct {
     // time complexity worst case O(n^2)
@@ -105,7 +106,7 @@ test "bubbleSort basic functionality" {
 
     Sorting.bubbleSort(i32, &arr);
 
-    try std.testing.expectEqualSlices(i32, &expected, &arr);
+    try testing.expectEqualSlices(i32, &expected, &arr);
 }
 
 test "bubbleSort empty array" {
@@ -113,7 +114,7 @@ test "bubbleSort empty array" {
 
     Sorting.bubbleSort(i32, &arr);
 
-    try std.testing.expectEqualSlices(i32, &[_]i32{}, &arr);
+    try testing.expectEqualSlices(i32, &[_]i32{}, &arr);
 }
 
 test "bubbleSort single element" {
@@ -122,7 +123,7 @@ test "bubbleSort single element" {
 
     Sorting.bubbleSort(i32, &arr);
 
-    try std.testing.expectEqualSlices(i32, &expected, &arr);
+    try testing.expectEqualSlices(i32, &expected, &arr);
 }
 
 test "bubbleSort already sorted" {
@@ -131,7 +132,7 @@ test "bubbleSort already sorted" {
 
     Sorting.bubbleSort(i32, &arr);
 
-    try std.testing.expectEqualSlices(i32, &expected, &arr);
+    try testing.expectEqualSlices(i32, &expected, &arr);
 }
 
 test "bubbleSort with duplicates" {
@@ -140,5 +141,58 @@ test "bubbleSort with duplicates" {
 
     Sorting.bubbleSort(i32, &arr);
 
-    try std.testing.expectEqualSlices(i32, &expected, &arr);
+    try testing.expectEqualSlices(i32, &expected, &arr);
+}
+
+// merge sort
+test "merge sort basic functionality" {
+    const allocator = testing.allocator;
+
+    var unsortedArray = [_]u8{ 64, 34, 25, 12, 22, 11, 90 };
+    const expectedArray = [_]u8{ 11, 12, 22, 25, 34, 64, 90 };
+
+    try Sorting.mergeSort(allocator, u8, &unsortedArray);
+
+    try testing.expectEqualSlices(u8, &expectedArray, &unsortedArray);
+}
+
+test "merge sort with empty array" {
+    const allocator = testing.allocator;
+
+    var emptyArray = [_]i32{};
+
+    try Sorting.mergeSort(allocator, i32, &emptyArray);
+
+    try testing.expectEqualSlices(i32, &[_]i32{}, &emptyArray);
+}
+
+test "merge sort single element" {
+    const allocator = testing.allocator;
+
+    var unsortedArray = [_]u8{255};
+    const expectedArray = [_]u8{255};
+
+    try Sorting.mergeSort(allocator, u8, &unsortedArray);
+
+    try testing.expectEqualSlices(u8, &expectedArray, &unsortedArray);
+}
+
+test "merge sort already sorted" {
+    const allocator = testing.allocator;
+
+    var unsortedArray = [_]u16{ 11, 12, 22, 25, 34, 64, 90 };
+    const expectedArray = [_]u16{ 11, 12, 22, 25, 34, 64, 90 };
+
+    try Sorting.mergeSort(allocator, u16, &unsortedArray);
+
+    try testing.expectEqualSlices(u16, &expectedArray, &unsortedArray);
+}
+
+test "merge sort failing allocator" {
+    var failingAllocator = testing.FailingAllocator.init(testing.allocator, .{ .fail_index = 0 });
+    const allocator = failingAllocator.allocator();
+
+    var array = [_]u8{ 7, 43, 24, 1, 9, 45 };
+
+    try testing.expectError(error.OutOfMemory, Sorting.mergeSort(allocator, u8, &array));
 }

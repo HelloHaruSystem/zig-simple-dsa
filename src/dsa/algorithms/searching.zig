@@ -1,9 +1,10 @@
 const std = @import("std");
+const testing = std.testing;
 
 pub const Searching = struct {
     // time complexity worst case O(n)
     // space complexity O(1)
-    pub fn LinearSearch(comptime T: type, arr: []const T, target: T) ?usize {
+    pub fn linearSearch(comptime T: type, arr: []const T, target: T) ?usize {
         for (arr, 0..) |number, i| {
             if (number == target) {
                 return i;
@@ -48,7 +49,7 @@ test "binary search basic funtionality" {
 
     const output = Searching.binarySearch(i32, sortedArray[0..], targetNumber);
 
-    try std.testing.expectEqual(expectedIndex, output);
+    try testing.expectEqual(expectedIndex, output);
 }
 
 test "binary search on empty array" {
@@ -57,7 +58,7 @@ test "binary search on empty array" {
 
     const output: ?usize = Searching.binarySearch(u8, emptyArray[0..], notPresentTarget);
 
-    try std.testing.expectEqual(null, output);
+    try testing.expectEqual(null, output);
 }
 
 test "binary search target not in array" {
@@ -66,7 +67,7 @@ test "binary search target not in array" {
 
     const output: ?usize = Searching.binarySearch(u8, sortedArray[0..], notPresentTarget);
 
-    try std.testing.expectEqual(null, output);
+    try testing.expectEqual(null, output);
 }
 
 test "binary search non present target is lower then first number in array" {
@@ -75,7 +76,7 @@ test "binary search non present target is lower then first number in array" {
 
     const output: ?usize = Searching.binarySearch(u8, sortedArray[0..], notPresentTarget);
 
-    try std.testing.expectEqual(null, output);
+    try testing.expectEqual(null, output);
 }
 
 test "binary search non present target is higher then last number in array" {
@@ -84,7 +85,7 @@ test "binary search non present target is higher then last number in array" {
 
     const output: ?usize = Searching.binarySearch(u8, sortedArray[0..], notPresentTarget);
 
-    try std.testing.expectEqual(null, output);
+    try testing.expectEqual(null, output);
 }
 
 test "binary search single element valid target" {
@@ -94,7 +95,7 @@ test "binary search single element valid target" {
 
     const output: ?usize = Searching.binarySearch(i8, oneElementArray[0..], target);
 
-    try std.testing.expectEqual(expected, output);
+    try testing.expectEqual(expected, output);
 }
 
 test "binary search two elements valid target" {
@@ -104,7 +105,7 @@ test "binary search two elements valid target" {
 
     const output = Searching.binarySearch(i32, twoIndexSortedArray[0..], target);
 
-    try std.testing.expectEqual(expected, output);
+    try testing.expectEqual(expected, output);
 }
 
 // Linear search
@@ -115,7 +116,7 @@ test "linear search basic funtionality" {
 
     const output = Searching.LinearSearch(u8, array[0..], target);
 
-    try std.testing.expectEqual(expectedIndex, output);
+    try testing.expectEqual(expectedIndex, output);
 }
 
 test "linear search on empty array" {
@@ -125,7 +126,7 @@ test "linear search on empty array" {
 
     const output = Searching.LinearSearch(i64, array[0..], target);
 
-    try std.testing.expectEqual(expectedResult, output);
+    try testing.expectEqual(expectedResult, output);
 }
 
 test "linear search target not in array" {
@@ -135,5 +136,5 @@ test "linear search target not in array" {
 
     const output = Searching.LinearSearch(u16, array[0..], target);
 
-    try std.testing.expectEqual(expectedResult, output);
+    try testing.expectEqual(expectedResult, output);
 }

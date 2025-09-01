@@ -36,45 +36,45 @@ pub const Sorting = struct {
 
         const n: usize = arr.len;
 
-        const midIndex: usize = n / 2;
-        var leftHalf = try allocator.alloc(T, midIndex);
-        var rightHalf = try allocator.alloc(T, n - midIndex);
+        const mid_index: usize = n / 2;
+        var left_half = try allocator.alloc(T, mid_index);
+        var right_half = try allocator.alloc(T, n - mid_index);
 
-        defer allocator.free(leftHalf);
-        defer allocator.free(rightHalf);
+        defer allocator.free(left_half);
+        defer allocator.free(right_half);
 
         // fill arrays
-        for (arr[0..midIndex], 0..) |number, i| {
-            leftHalf[i] = number;
+        for (arr[0..mid_index], 0..) |number, i| {
+            left_half[i] = number;
         }
-        for (arr[midIndex..n], 0..) |number, i| {
-            rightHalf[i] = number;
+        for (arr[mid_index..n], 0..) |number, i| {
+            right_half[i] = number;
         }
 
         // divide
-        try mergeSort(allocator, T, leftHalf);
-        try mergeSort(allocator, T, rightHalf);
+        try mergeSort(allocator, T, left_half);
+        try mergeSort(allocator, T, right_half);
 
         // conquer
-        merge(T, arr, leftHalf, rightHalf);
+        merge(T, arr, left_half, right_half);
     }
 
     // merge function
     // helper functions for merge sort
-    fn merge(comptime T: type, originalArray: []T, leftArray: []T, rightArray: []T) void {
-        const leftSize: usize = leftArray.len;
-        const rightSize: usize = rightArray.len;
+    fn merge(comptime T: type, original_array: []T, left_array: []T, right_array: []T) void {
+        const left_size: usize = left_array.len;
+        const right_size: usize = right_array.len;
 
         var i: usize = 0;
         var j: usize = 0;
         var k: usize = 0;
 
-        while (i < leftSize and j < rightSize) {
-            if (leftArray[i] <= rightArray[j]) {
-                originalArray[k] = leftArray[i];
+        while (i < left_size and j < right_size) {
+            if (left_array[i] <= right_array[j]) {
+                original_array[k] = left_array[i];
                 i += 1;
             } else {
-                originalArray[k] = rightArray[j];
+                original_array[k] = right_array[j];
                 j += 1;
             }
 
@@ -83,15 +83,15 @@ pub const Sorting = struct {
 
         // clean-up add remaining elements
         // first check left array
-        while (i < leftSize) {
-            originalArray[k] = leftArray[i];
+        while (i < left_size) {
+            original_array[k] = left_array[i];
             i += 1;
             k += 1;
         }
 
         // then check right array
-        while (j < rightSize) {
-            originalArray[k] = rightArray[j];
+        while (j < right_size) {
+            original_array[k] = right_array[j];
             j += 1;
             k += 1;
         }
@@ -148,49 +148,49 @@ test "bubbleSort with duplicates" {
 test "merge sort basic functionality" {
     const allocator = testing.allocator;
 
-    var unsortedArray = [_]u8{ 64, 34, 25, 12, 22, 11, 90 };
-    const expectedArray = [_]u8{ 11, 12, 22, 25, 34, 64, 90 };
+    var unsorted_array = [_]u8{ 64, 34, 25, 12, 22, 11, 90 };
+    const expected_array = [_]u8{ 11, 12, 22, 25, 34, 64, 90 };
 
-    try Sorting.mergeSort(allocator, u8, &unsortedArray);
+    try Sorting.mergeSort(allocator, u8, &unsorted_array);
 
-    try testing.expectEqualSlices(u8, &expectedArray, &unsortedArray);
+    try testing.expectEqualSlices(u8, &expected_array, &unsorted_array);
 }
 
 test "merge sort with empty array" {
     const allocator = testing.allocator;
 
-    var emptyArray = [_]i32{};
+    var empty_array = [_]i32{};
 
-    try Sorting.mergeSort(allocator, i32, &emptyArray);
+    try Sorting.mergeSort(allocator, i32, &empty_array);
 
-    try testing.expectEqualSlices(i32, &[_]i32{}, &emptyArray);
+    try testing.expectEqualSlices(i32, &[_]i32{}, &empty_array);
 }
 
 test "merge sort single element" {
     const allocator = testing.allocator;
 
-    var unsortedArray = [_]u8{255};
-    const expectedArray = [_]u8{255};
+    var unsorted_array = [_]u8{255};
+    const expected_array = [_]u8{255};
 
-    try Sorting.mergeSort(allocator, u8, &unsortedArray);
+    try Sorting.mergeSort(allocator, u8, &unsorted_array);
 
-    try testing.expectEqualSlices(u8, &expectedArray, &unsortedArray);
+    try testing.expectEqualSlices(u8, &expected_array, &unsorted_array);
 }
 
 test "merge sort already sorted" {
     const allocator = testing.allocator;
 
-    var unsortedArray = [_]u16{ 11, 12, 22, 25, 34, 64, 90 };
-    const expectedArray = [_]u16{ 11, 12, 22, 25, 34, 64, 90 };
+    var unsorted_array = [_]u16{ 11, 12, 22, 25, 34, 64, 90 };
+    const expected_array = [_]u16{ 11, 12, 22, 25, 34, 64, 90 };
 
-    try Sorting.mergeSort(allocator, u16, &unsortedArray);
+    try Sorting.mergeSort(allocator, u16, &unsorted_array);
 
-    try testing.expectEqualSlices(u16, &expectedArray, &unsortedArray);
+    try testing.expectEqualSlices(u16, &expected_array, &unsorted_array);
 }
 
 test "merge sort failing allocator" {
-    var failingAllocator = testing.FailingAllocator.init(testing.allocator, .{ .fail_index = 0 });
-    const allocator = failingAllocator.allocator();
+    var failing_allocator = testing.FailingAllocator.init(testing.allocator, .{ .fail_index = 0 });
+    const allocator = failing_allocator.allocator();
 
     var array = [_]u8{ 7, 43, 24, 1, 9, 45 };
 

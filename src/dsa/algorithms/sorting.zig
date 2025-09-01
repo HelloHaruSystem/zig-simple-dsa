@@ -19,7 +19,6 @@ pub const Sorting = struct {
 };
 
 // tests
-
 // bubble sort
 test "bubbleSort basic functionality" {
     var arr = [_]i32{ 64, 34, 25, 12, 22, 11, 90 };

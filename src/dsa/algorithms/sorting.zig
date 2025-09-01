@@ -6,7 +6,7 @@ pub const Sorting = struct {
     pub fn bubbleSort(comptime T: type, arr: []T) void {
         if (arr.len <= 1) return;
 
-        var n = arr.len;
+        var n: usize = arr.len;
 
         while (true) {
             var swapped = false;
@@ -30,15 +30,17 @@ pub const Sorting = struct {
 
     // time complexity worst case O(n log n)
     // space complexity O(n)
-    pub fn mergeSort(allocator: std.mem.Allocator, comptime T: type, arr: []const T) !void {
-        const n: usize = arr.len;
+    pub fn mergeSort(allocator: std.mem.Allocator, comptime T: type, arr: []T) !void {
+        if (arr.len <= 1) return;
 
-        // check if array is empty or a single value
-        if (n <= 1) return;
+        const n: usize = arr.len;
 
         const midIndex: usize = n / 2;
         var leftHalf = try allocator.alloc(T, midIndex);
         var rightHalf = try allocator.alloc(T, n - midIndex);
+
+        defer allocator.free(leftHalf);
+        defer allocator.free(rightHalf);
 
         // fill arrays
         for (arr[0..midIndex], 0..) |number, i| {
@@ -46,6 +48,51 @@ pub const Sorting = struct {
         }
         for (arr[midIndex..n], 0..) |number, i| {
             rightHalf[i] = number;
+        }
+
+        // divide
+        try mergeSort(allocator, T, leftHalf);
+        try mergeSort(allocator, T, rightHalf);
+
+        // conquer
+        merge(T, arr, leftHalf, rightHalf);
+    }
+
+    // merge function
+    // helper functions for merge sort
+    fn merge(comptime T: type, originalArray: []T, leftArray: []T, rightArray: []T) void {
+        const leftSize: usize = leftArray.len;
+        const rightSize: usize = rightArray.len;
+
+        var i: usize = 0;
+        var j: usize = 0;
+        var k: usize = 0;
+
+        while (i < leftSize and j < rightSize) {
+            if (leftArray[i] <= rightArray[j]) {
+                originalArray[k] = leftArray[i];
+                i += 1;
+            } else {
+                originalArray[k] = rightArray[j];
+                j += 1;
+            }
+
+            k += 1;
+        }
+
+        // clean-up add remaining elements
+        // first check left array
+        while (i < leftSize) {
+            originalArray[k] = leftArray[i];
+            i += 1;
+            k += 1;
+        }
+
+        // then check right array
+        while (j < rightSize) {
+            originalArray[k] = rightArray[j];
+            j += 1;
+            k += 1;
         }
     }
 };

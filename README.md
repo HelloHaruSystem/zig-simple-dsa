@@ -15,6 +15,7 @@ Practicing data structures and algorithms while getting comfortable with Zig syn
 - [ ] Hash Maps
 - [ ] Binary Trees
 - [ ] Heaps
+- [ ] Ring Buffer
 
 **Algorithms**
 - [x] Linear & Binary Search

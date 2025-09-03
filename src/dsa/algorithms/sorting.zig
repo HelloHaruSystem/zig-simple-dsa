@@ -7,23 +7,18 @@ pub const Sorting = struct {
     pub fn bubbleSort(comptime T: type, arr: []T) void {
         if (arr.len <= 1) return;
 
-        var n: usize = arr.len;
+        var swapped = true;
+        var n = arr.len;
 
-        while (true) {
-            var swapped = false;
-            var i: usize = 0;
+        while (swapped) {
+            swapped = false;
 
-            while (i < n - 1) : (i += 1) {
+            for (0..n - 1) |i| {
                 if (arr[i] > arr[i + 1]) {
-                    const temp = arr[i + 1];
-                    arr[i + 1] = arr[i];
-                    arr[i] = temp;
+                    std.mem.swap(T, &arr[i], &arr[i + 1]);
                     swapped = true;
                 }
             }
-
-            // no swap = array is sorted
-            if (!swapped) break;
 
             n -= 1;
         }

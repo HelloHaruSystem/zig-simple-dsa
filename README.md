@@ -11,11 +11,11 @@ Practicing data structures and algorithms while getting comfortable with Zig syn
 **Data Structures**
 - [ ] Arrays & Dynamic Arrays
 - [ ] Linked Lists
+- [ ] Ring Buffer
 - [ ] Stacks & Queues
 - [ ] Hash Maps
 - [ ] Binary Trees
 - [ ] Heaps
-- [ ] Ring Buffer
 
 **Algorithms**
 - [x] Linear & Binary Search

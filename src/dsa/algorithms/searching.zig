@@ -19,9 +19,9 @@ pub const Searching = struct {
         if (arr.len == 0) return null;
 
         var start: usize = 0;
-        var end: usize = arr.len - 1;
+        var end: usize = arr.len;
 
-        while (start <= end) {
+        while (start < end) {
             const mid: usize = start + ((end - start) / 2);
 
             if (arr[mid] == target) {
@@ -29,8 +29,7 @@ pub const Searching = struct {
             }
 
             if (target < arr[mid]) {
-                if (mid == 0) break;
-                end = mid - 1;
+                end = mid;
             } else {
                 start = mid + 1;
             }

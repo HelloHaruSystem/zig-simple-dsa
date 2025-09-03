@@ -18,6 +18,30 @@ pub fn SinglyLinkedList(comptime T: type) type {
         pub fn deinit(self: *Self) void {
             _ = self;
         }
+
+        pub fn isEmpty(self: *Self) bool {
+            return self.head == null;
+        }
+
+        pub fn prepend(self: *Self, data: T) !void {
+            const newNode = try self.allocator.create(Node(T));
+            newNode.* = Node(T).init(data);
+
+            newNode.next = self.head;
+            self.head = newNode;
+        }
+
+        pub fn popHead(self: *Self) ?T {
+            if (self.head == null) return null;
+
+            const poppedHead = self.head.?;
+            const data = poppedHead.data;
+
+            self.head = poppedHead.next;
+            self.allocator.destroy(poppedHead);
+
+            return data;
+        }
     };
 }
 

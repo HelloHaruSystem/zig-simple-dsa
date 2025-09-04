@@ -18,7 +18,7 @@ pub fn SinglyLinkedList(comptime T: type) type {
 
         pub fn deinit(self: *Self) void {
             while (self.popHead() != null) {
-                // pop fress nodes so keep this loop body empty
+                // pop frees nodes so keep this loop body empty
             }
             // don't destroy self since the list will usually be stack allocated
         }
@@ -56,7 +56,24 @@ pub fn SinglyLinkedList(comptime T: type) type {
             return false;
         }
 
-        // TODO: add reverse function!
+        pub fn reverse(self: *Self) void {
+            var current = self.head;
+            var previous: ?*Node(T) = null;
+
+            while (current != null) {
+                // get a pointer to the next node
+                const next: ?*Node(T) = current.?.next;
+
+                // reverse the current node
+                current.?.next = previous;
+
+                // advance in the list
+                previous = current;
+                current = next;
+            }
+
+            self.head = previous;
+        }
 
         pub fn iterator(self: *Self) Iterator {
             return Iterator{
@@ -325,4 +342,27 @@ test "with custom struct type" {
 
     const remaining = list.popHead().?;
     try testing.expect(remaining.eql(p1));
+}
+
+test "basic reverse functionality" {
+    const allocator = testing.allocator;
+    var list = SinglyLinkedList(u32).init(allocator);
+    defer list.deinit();
+
+    const values = [_]u32{ 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096 };
+
+    var i: usize = 0;
+    while (i < values.len) : (i += 1) {
+        try list.prepend(values[i]);
+    }
+
+    list.reverse();
+
+    for (values) |expected_value| {
+        const actual = list.popHead().?;
+        try testing.expectEqual(expected_value, actual);
+    }
+
+    try testing.expect(list.isEmpty());
+    try testing.expect(list.head == null);
 }

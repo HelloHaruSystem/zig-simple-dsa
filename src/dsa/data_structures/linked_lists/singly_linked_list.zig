@@ -61,7 +61,12 @@ pub fn SinglyLinkedList(comptime T: type) type {
             self.size += 1;
         }
 
-        // peak head
+        pub fn peekHead(self: *Self) ?T {
+            if (self.head) |head| {
+                return head.data;
+            }
+            return null;
+        }
 
         pub fn popHead(self: *Self) ?T {
             if (self.head == null) return null;
@@ -536,4 +541,14 @@ test "getLast basic funtionality" {
     try list.append(2);
 
     try testing.expectEqual(@as(i32, 2), list.getLast().?);
+}
+
+test "peekHead basic functionality" {
+    const allocator = testing.allocator;
+    var list = SinglyLinkedList(i32).init(allocator);
+    defer list.deinit();
+
+    try list.prepend(64);
+
+    try testing.expectEqual(@as(u8, 64), list.peekHead().?);
 }

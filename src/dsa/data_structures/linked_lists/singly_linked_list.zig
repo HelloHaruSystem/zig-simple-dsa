@@ -60,6 +60,13 @@ pub fn SinglyLinkedList(comptime T: type) type {
             return null;
         }
 
+        pub fn peekTail(self: *Self) ?T {
+            if (self.getTail()) |tail| {
+                return tail.data;
+            }
+            return null;
+        }
+
         pub fn popHead(self: *Self) ?T {
             if (self.isEmpty()) return null;
 
@@ -717,4 +724,23 @@ test "concat basic funcionality" {
     try testing.expect(list2.isEmpty());
     try testing.expectEqual(@as(usize, 0), list2.getSize());
     try testing.expect(list2.popHead() == null);
+}
+
+test "peekTail basic functionality" {
+    const allocator = testing.allocator;
+    var list = SinglyLinkedList(i32).init(allocator);
+    defer list.deinit();
+
+    try list.prepend(1);
+    try list.prepend(0);
+
+    try testing.expectEqual(@as(i32, 1), list.peekTail());
+}
+
+test "peekTail on empty list" {
+    const allocator = testing.allocator;
+    var list = SinglyLinkedList(u8).init(allocator);
+    defer list.deinit();
+
+    try testing.expectEqual(null, list.peekTail());
 }

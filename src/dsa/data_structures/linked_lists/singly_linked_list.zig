@@ -29,7 +29,7 @@ pub fn SinglyLinkedList(comptime T: type) type {
             return self.size == 0 and self.head == null;
         }
 
-        pub fn get_size(self: *Self) usize {
+        pub fn getSize(self: *Self) usize {
             return self.size;
         }
 
@@ -42,7 +42,26 @@ pub fn SinglyLinkedList(comptime T: type) type {
             self.size += 1;
         }
 
-        // TODO: append
+        pub fn append(self: *Self, data: T) !void {
+            const newNode = try self.allocator.create(Node(T));
+            newNode.* = Node(T).init(data);
+
+            if (self.isEmpty()) {
+                self.head = newNode;
+            } else {
+                var current: ?*Node(T) = self.head;
+
+                while (current.?.next != null) {
+                    current = current.?.next;
+                }
+
+                current.?.setNext(newNode);
+            }
+
+            self.size += 1;
+        }
+
+        // peak head
 
         pub fn popHead(self: *Self) ?T {
             if (self.head == null) return null;
@@ -69,6 +88,17 @@ pub fn SinglyLinkedList(comptime T: type) type {
         }
 
         // TODO: getLast
+        pub fn getLast(self: *Self) ?T {
+            if (self.isEmpty()) return null;
+            if (self.getSize() == 1) return self.head.?.data;
+
+            var current: ?*Node(T) = self.head;
+            while (current.?.next != null) {
+                current = current.?.next;
+            }
+
+            return current.?.data;
+        }
 
         pub fn reverse(self: *Self) void {
             var current = self.head;
@@ -402,7 +432,7 @@ test "basic reverse functionality" {
     try testing.expect(list.head == null);
 }
 
-test "basic recursive functionality" {
+test "recursive reverse basic functionality" {
     const allocator = testing.allocator;
     var list = SinglyLinkedList(u32).init(allocator);
     defer list.deinit();
@@ -430,16 +460,16 @@ test "size increases with prepend operations" {
     var list = SinglyLinkedList(i32).init(allocator);
     defer list.deinit();
 
-    try testing.expectEqual(@as(usize, 0), list.get_size());
+    try testing.expectEqual(@as(usize, 0), list.getSize());
 
     try list.prepend(10);
-    try testing.expectEqual(@as(usize, 1), list.get_size());
+    try testing.expectEqual(@as(usize, 1), list.getSize());
 
     try list.prepend(20);
-    try testing.expectEqual(@as(usize, 2), list.get_size());
+    try testing.expectEqual(@as(usize, 2), list.getSize());
 
     try list.prepend(30);
-    try testing.expectEqual(@as(usize, 3), list.get_size());
+    try testing.expectEqual(@as(usize, 3), list.getSize());
 }
 
 test "size decreases with popHead operations" {
@@ -450,18 +480,60 @@ test "size decreases with popHead operations" {
     try list.prepend(1);
     try list.prepend(2);
     try list.prepend(3);
-    try testing.expectEqual(@as(usize, 3), list.get_size());
+    try testing.expectEqual(@as(usize, 3), list.getSize());
 
     _ = list.popHead();
-    try testing.expectEqual(@as(usize, 2), list.get_size());
+    try testing.expectEqual(@as(usize, 2), list.getSize());
 
     _ = list.popHead();
-    try testing.expectEqual(@as(usize, 1), list.get_size());
+    try testing.expectEqual(@as(usize, 1), list.getSize());
 
     _ = list.popHead();
-    try testing.expectEqual(@as(usize, 0), list.get_size());
+    try testing.expectEqual(@as(usize, 0), list.getSize());
 
     const result = list.popHead();
     try testing.expect(result == null);
-    try testing.expectEqual(@as(usize, 0), list.get_size());
+    try testing.expectEqual(@as(usize, 0), list.getSize());
+}
+
+test "append basic funtionality" {
+    const allocator = testing.allocator;
+    var list = SinglyLinkedList(u8).init(allocator);
+    defer list.deinit();
+
+    try list.append(255);
+    try list.append(0);
+
+    try testing.expect(!list.isEmpty());
+    try testing.expectEqual(@as(usize, 2), list.getSize());
+    try testing.expectEqual(@as(u8, 255), list.popHead());
+    try testing.expectEqual(@as(u8, 0), list.popHead());
+    try testing.expect(list.isEmpty());
+}
+
+test "append vs prepend order" {
+    const allocator = testing.allocator;
+    var list = SinglyLinkedList(i32).init(allocator);
+    defer list.deinit();
+
+    try list.append(1);
+    try list.prepend(0);
+    try list.append(2);
+
+    // Should be: 0 -> 1 -> 2
+    try testing.expectEqual(@as(i32, 0), list.popHead().?);
+    try testing.expectEqual(@as(i32, 1), list.popHead().?);
+    try testing.expectEqual(@as(i32, 2), list.popHead().?);
+}
+
+test "getLast basic funtionality" {
+    const allocator = testing.allocator;
+    var list = SinglyLinkedList(i32).init(allocator);
+    defer list.deinit();
+
+    try list.append(1);
+    try list.prepend(0);
+    try list.append(2);
+
+    try testing.expectEqual(@as(i32, 2), list.getLast().?);
 }

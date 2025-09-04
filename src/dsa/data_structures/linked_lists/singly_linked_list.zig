@@ -49,13 +49,7 @@ pub fn SinglyLinkedList(comptime T: type) type {
             if (self.isEmpty()) {
                 self.head = newNode;
             } else {
-                var current: ?*Node(T) = self.head;
-
-                while (current.?.next != null) {
-                    current = current.?.next;
-                }
-
-                current.?.setNext(newNode);
+                self.getTail().?.setNext(newNode);
             }
 
             self.size += 1;
@@ -81,7 +75,6 @@ pub fn SinglyLinkedList(comptime T: type) type {
             return data;
         }
 
-        // TODO: popTail
         pub fn popTail(self: *Self) ?T {
             if (self.isEmpty()) return null;
 
@@ -89,15 +82,11 @@ pub fn SinglyLinkedList(comptime T: type) type {
                 return self.popHead();
             }
 
-            var current = self.head;
-            while (current.?.next.?.next != null) {
-                current = current.?.next;
-            }
-
-            const poppedTail = current.?.next.?;
+            const secondToLast = self.getSecondToLast().?;
+            const poppedTail = secondToLast.next.?;
             const data = poppedTail.data;
 
-            current.?.next = null;
+            secondToLast.next = null;
             self.allocator.destroy(poppedTail);
             self.size -= 1;
 
@@ -106,26 +95,18 @@ pub fn SinglyLinkedList(comptime T: type) type {
 
         // TODO: clear
 
-        // TODO: concat
         pub fn concat(self: *Self, other: *Self) void {
             if (other.isEmpty()) return;
+
             if (self.isEmpty()) {
                 self.head = other.head;
                 self.size = other.size;
-                other.head = null;
-                other.size = 0;
-
-                return;
+            } else {
+                self.getTail().?.next = other.head;
+                self.size += other.size;
             }
 
-            var current = self.head;
-            while (current.?.next != null) {
-                current = current.?.next;
-            }
-            current.?.next = other.head;
-            self.size += other.size;
-
-            // clear other list
+            // clean other list
             other.head = null;
             other.size = 0;
         }
@@ -167,15 +148,11 @@ pub fn SinglyLinkedList(comptime T: type) type {
         }
 
         pub fn getLast(self: *Self) ?T {
-            if (self.isEmpty()) return null;
-            if (self.getSize() == 1) return self.head.?.data;
-
-            var current: ?*Node(T) = self.head;
-            while (current.?.next != null) {
-                current = current.?.next;
+            if (self.getTail()) |tail| {
+                return tail.data;
             }
 
-            return current.?.data;
+            return null;
         }
 
         pub fn reverse(self: *Self) void {
@@ -248,6 +225,27 @@ pub fn SinglyLinkedList(comptime T: type) type {
                 return null;
             }
         };
+
+        // helper functions
+        fn getTail(self: *Self) ?*Node(T) {
+            if (self.isEmpty()) return null;
+
+            var current = self.head;
+            while (current.?.next != null) {
+                current = current.?.next;
+            }
+            return current;
+        }
+
+        fn getSecondToLast(self: *Self) ?*Node(T) {
+            if (self.isEmpty() or self.head.?.next == null) return null;
+
+            var current = self.head;
+            while (current.?.next.?.next != null) {
+                current = current.?.next;
+            }
+            return current;
+        }
     };
 }
 

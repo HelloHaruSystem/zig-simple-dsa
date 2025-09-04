@@ -75,6 +75,25 @@ pub fn SinglyLinkedList(comptime T: type) type {
             self.head = previous;
         }
 
+        pub fn recursive_reverse(self: *Self) void {
+            self.head = recursive_reverse_helper(self.head, null);
+        }
+
+        fn recursive_reverse_helper(current: ?*Node(T), previous: ?*Node(T)) ?*Node(T) {
+            if (current == null) {
+                return previous;
+            }
+
+            // get the pointer to the next Node
+            const next: ?*Node(T) = current.?.next;
+
+            // reverse the current node
+            current.?.next = previous;
+
+            // advance in the list
+            return recursive_reverse_helper(next, current);
+        }
+
         pub fn iterator(self: *Self) Iterator {
             return Iterator{
                 .current = self.head,
@@ -357,6 +376,29 @@ test "basic reverse functionality" {
     }
 
     list.reverse();
+
+    for (values) |expected_value| {
+        const actual = list.popHead().?;
+        try testing.expectEqual(expected_value, actual);
+    }
+
+    try testing.expect(list.isEmpty());
+    try testing.expect(list.head == null);
+}
+
+test "basic recursive functionality" {
+    const allocator = testing.allocator;
+    var list = SinglyLinkedList(u32).init(allocator);
+    defer list.deinit();
+
+    const values = [_]u32{ 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1 };
+
+    var i: usize = 0;
+    while (i < values.len) : (i += 1) {
+        try list.prepend(values[i]);
+    }
+
+    list.recursive_reverse();
 
     for (values) |expected_value| {
         const actual = list.popHead().?;

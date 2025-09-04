@@ -8,11 +8,13 @@ pub fn SinglyLinkedList(comptime T: type) type {
         // fields
         allocator: std.mem.Allocator,
         head: ?*Node(T),
+        size: usize,
 
         pub fn init(allocator: std.mem.Allocator) Self {
             return Self{
                 .allocator = allocator,
                 .head = null,
+                .size = 0,
             };
         }
 
@@ -24,7 +26,11 @@ pub fn SinglyLinkedList(comptime T: type) type {
         }
 
         pub fn isEmpty(self: *Self) bool {
-            return self.head == null;
+            return self.size == 0 and self.head == null;
+        }
+
+        pub fn get_size(self: *Self) T {
+            return self.size;
         }
 
         pub fn prepend(self: *Self, data: T) !void {
@@ -33,7 +39,10 @@ pub fn SinglyLinkedList(comptime T: type) type {
 
             newNode.next = self.head;
             self.head = newNode;
+            self.size += 1;
         }
+
+        // TODO: append
 
         pub fn popHead(self: *Self) ?T {
             if (self.head == null) return null;
@@ -43,9 +52,12 @@ pub fn SinglyLinkedList(comptime T: type) type {
 
             self.head = poppedHead.next;
             self.allocator.destroy(poppedHead);
+            self.size -= 1;
 
             return data;
         }
+
+        // TODO: remove (remove first instance of a specific value)
 
         pub fn contains(self: *Self, target_data: T) bool {
             var current = self.head;
@@ -55,6 +67,8 @@ pub fn SinglyLinkedList(comptime T: type) type {
             }
             return false;
         }
+
+        // TODO: getLast
 
         pub fn reverse(self: *Self) void {
             var current = self.head;
@@ -93,6 +107,8 @@ pub fn SinglyLinkedList(comptime T: type) type {
             // advance in the list
             return recursive_reverse_helper(next, current);
         }
+
+        // TODO: mergeSort
 
         pub fn iterator(self: *Self) Iterator {
             return Iterator{

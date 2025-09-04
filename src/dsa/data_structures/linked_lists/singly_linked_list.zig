@@ -34,8 +34,7 @@ pub fn SinglyLinkedList(comptime T: type) type {
         }
 
         pub fn prepend(self: *Self, data: T) !void {
-            const newNode = try self.allocator.create(Node(T));
-            newNode.* = Node(T).init(data);
+            const newNode = try self.createNode(data);
 
             newNode.next = self.head;
             self.head = newNode;
@@ -43,8 +42,7 @@ pub fn SinglyLinkedList(comptime T: type) type {
         }
 
         pub fn append(self: *Self, data: T) !void {
-            const newNode = try self.allocator.create(Node(T));
-            newNode.* = Node(T).init(data);
+            const newNode = try self.createNode(data);
 
             if (self.isEmpty()) {
                 self.head = newNode;
@@ -245,6 +243,12 @@ pub fn SinglyLinkedList(comptime T: type) type {
                 current = current.?.next;
             }
             return current;
+        }
+
+        fn createNode(self: *Self, data: T) !*Node(T) {
+            const newNode = try self.allocator.create(Node(T));
+            newNode.* = Node(T).init(data);
+            return newNode;
         }
     };
 }
@@ -627,7 +631,7 @@ test "peekHead basic functionality" {
 
     try list.prepend(64);
 
-    try testing.expectEqual(@as(u8, 64), list.peekHead().?);
+    try testing.expectEqual(@as(i32, 64), list.peekHead().?);
 }
 
 test "removeFirstOccurrence basic functionality" {

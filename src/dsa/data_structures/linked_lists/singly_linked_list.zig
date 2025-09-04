@@ -69,7 +69,7 @@ pub fn SinglyLinkedList(comptime T: type) type {
         }
 
         pub fn popHead(self: *Self) ?T {
-            if (self.head == null) return null;
+            if (self.isEmpty()) return null;
 
             const poppedHead = self.head.?;
             const data = poppedHead.data;
@@ -81,7 +81,33 @@ pub fn SinglyLinkedList(comptime T: type) type {
             return data;
         }
 
-        // TODO: remove (remove first instance of a specific value)
+        // TODO: popTail
+        pub fn popTail(self: *Self) ?T {
+            if (self.isEmpty()) return null;
+
+            if (self.head.?.next == null) {
+                return self.popHead();
+            }
+
+            var current = self.head;
+            while (current.?.next.?.next != null) {
+                current = current.?.next;
+            }
+
+            const poppedTail = current.?.next.?;
+            const data = poppedTail.data;
+
+            current.?.next = null;
+            self.allocator.destroy(poppedTail);
+            self.size -= 1;
+
+            return data;
+        }
+
+        // TODO: clear
+
+        // TODO: concat
+
         pub fn removeFirstOccurence(self: *Self, toRemove: T) bool {
             if (self.isEmpty()) return false;
 
@@ -106,6 +132,8 @@ pub fn SinglyLinkedList(comptime T: type) type {
 
             return false;
         }
+
+        // TODO: remove all
 
         pub fn contains(self: *Self, target_data: T) bool {
             var current = self.head;
@@ -167,6 +195,12 @@ pub fn SinglyLinkedList(comptime T: type) type {
         }
 
         // TODO: mergeSort
+
+        // TODO: toSlice
+
+        // TODO: fromSlice
+
+        // copy deep copy of the list
 
         pub fn iterator(self: *Self) Iterator {
             return Iterator{
@@ -609,4 +643,21 @@ test "removeFirstOccurrence remove target not present" {
     try list.append(2);
 
     try testing.expect(!list.removeFirstOccurence(1000));
+}
+
+test "popTail basic functionality" {
+    const allocator = testing.allocator;
+    var list = SinglyLinkedList(i32).init(allocator);
+    defer list.deinit();
+
+    try list.prepend(1);
+    try list.prepend(0);
+    try list.prepend(2);
+
+    try testing.expectEqual(@as(i32, 1), list.popTail());
+    try testing.expectEqual(@as(usize, 2), list.getSize());
+    try testing.expectEqual(@as(i32, 0), list.popTail());
+    // try with head
+    try testing.expectEqual(@as(i32, 2), list.popTail());
+    try testing.expect(list.isEmpty());
 }

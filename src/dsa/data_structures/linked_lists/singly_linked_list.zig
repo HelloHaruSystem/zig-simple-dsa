@@ -447,13 +447,11 @@ test "size decreases with popHead operations" {
     var list = SinglyLinkedList(i32).init(allocator);
     defer list.deinit();
 
-    // Add some elements
     try list.prepend(1);
     try list.prepend(2);
     try list.prepend(3);
     try testing.expectEqual(@as(usize, 3), list.get_size());
 
-    // Pop elements and check size
     _ = list.popHead();
     try testing.expectEqual(@as(usize, 2), list.get_size());
 
@@ -463,7 +461,6 @@ test "size decreases with popHead operations" {
     _ = list.popHead();
     try testing.expectEqual(@as(usize, 0), list.get_size());
 
-    // Pop from empty list should not change size
     const result = list.popHead();
     try testing.expect(result == null);
     try testing.expectEqual(@as(usize, 0), list.get_size());

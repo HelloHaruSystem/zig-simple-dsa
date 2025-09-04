@@ -107,6 +107,28 @@ pub fn SinglyLinkedList(comptime T: type) type {
         // TODO: clear
 
         // TODO: concat
+        pub fn concat(self: *Self, other: *Self) void {
+            if (other.isEmpty()) return;
+            if (self.isEmpty()) {
+                self.head = other.head;
+                self.size = other.size;
+                other.head = null;
+                other.size = 0;
+
+                return;
+            }
+
+            var current = self.head;
+            while (current.?.next != null) {
+                current = current.?.next;
+            }
+            current.?.next = other.head;
+            self.size += other.size;
+
+            // clear other list
+            other.head = null;
+            other.size = 0;
+        }
 
         pub fn removeFirstOccurence(self: *Self, toRemove: T) bool {
             if (self.isEmpty()) return false;
@@ -200,7 +222,7 @@ pub fn SinglyLinkedList(comptime T: type) type {
 
         // TODO: fromSlice
 
-        // copy deep copy of the list
+        // TODO: copy deep copy of the list
 
         pub fn iterator(self: *Self) Iterator {
             return Iterator{
@@ -660,4 +682,37 @@ test "popTail basic functionality" {
     // try with head
     try testing.expectEqual(@as(i32, 2), list.popTail());
     try testing.expect(list.isEmpty());
+}
+
+test "concat basic funcionality" {
+    const allocator = testing.allocator;
+    var list1 = SinglyLinkedList(i32).init(allocator);
+    var list2 = SinglyLinkedList(i32).init(allocator);
+    defer list1.deinit();
+    defer list2.deinit();
+
+    try list1.prepend(1);
+    try list1.prepend(0);
+    try list1.prepend(2);
+
+    try list2.prepend(1);
+    try list2.prepend(0);
+    try list2.prepend(2);
+
+    list1.concat(&list2);
+
+    // list1 should now be: 2 -> 0 -> 1 -> 2 -> 0 -> 1
+    try testing.expectEqual(@as(usize, 6), list1.getSize());
+    try testing.expectEqual(@as(i32, 2), list1.popHead().?);
+    try testing.expectEqual(@as(i32, 0), list1.popHead().?);
+    try testing.expectEqual(@as(i32, 1), list1.popHead().?);
+    try testing.expectEqual(@as(i32, 2), list1.popHead().?);
+    try testing.expectEqual(@as(i32, 0), list1.popHead().?);
+    try testing.expectEqual(@as(i32, 1), list1.popHead().?);
+    try testing.expect(list1.isEmpty());
+
+    // list2 should now be empty
+    try testing.expect(list2.isEmpty());
+    try testing.expectEqual(@as(usize, 0), list2.getSize());
+    try testing.expect(list2.popHead() == null);
 }

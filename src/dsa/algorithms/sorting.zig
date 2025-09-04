@@ -32,19 +32,15 @@ pub const Sorting = struct {
         const n: usize = arr.len;
 
         const mid_index: usize = n / 2;
-        var left_half = try allocator.alloc(T, mid_index);
-        var right_half = try allocator.alloc(T, n - mid_index);
+        const left_half = try allocator.alloc(T, mid_index);
+        const right_half = try allocator.alloc(T, n - mid_index);
 
         defer allocator.free(left_half);
         defer allocator.free(right_half);
 
         // fill arrays
-        for (arr[0..mid_index], 0..) |number, i| {
-            left_half[i] = number;
-        }
-        for (arr[mid_index..n], 0..) |number, i| {
-            right_half[i] = number;
-        }
+        @memcpy(left_half, arr[0..mid_index]);
+        @memcpy(right_half, arr[mid_index..n]);
 
         // divide
         try mergeSort(allocator, T, left_half);
@@ -56,7 +52,7 @@ pub const Sorting = struct {
 
     // merge function
     // helper functions for merge sort
-    fn merge(comptime T: type, original_array: []T, left_array: []T, right_array: []T) void {
+    fn merge(comptime T: type, original_array: []T, left_array: []const T, right_array: []const T) void {
         const left_size: usize = left_array.len;
         const right_size: usize = right_array.len;
 

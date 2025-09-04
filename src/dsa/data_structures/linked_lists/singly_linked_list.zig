@@ -82,6 +82,30 @@ pub fn SinglyLinkedList(comptime T: type) type {
         }
 
         // TODO: remove (remove first instance of a specific value)
+        pub fn removeFirstOccurence(self: *Self, toRemove: T) bool {
+            if (self.isEmpty()) return false;
+
+            // if toRemove is head
+            if (self.head.?.data == toRemove) {
+                return self.popHead() != null;
+            }
+
+            var current: ?*Node(T) = self.head;
+            while (current.?.next != null) {
+                if (current.?.next.?.data == toRemove) {
+                    const nodeToRemove: *Node(T) = current.?.next.?;
+                    current.?.next = nodeToRemove.next;
+
+                    self.allocator.destroy(nodeToRemove);
+                    self.size -= 1;
+
+                    return true;
+                }
+                current = current.?.next;
+            }
+
+            return false;
+        }
 
         pub fn contains(self: *Self, target_data: T) bool {
             var current = self.head;
@@ -92,7 +116,6 @@ pub fn SinglyLinkedList(comptime T: type) type {
             return false;
         }
 
-        // TODO: getLast
         pub fn getLast(self: *Self) ?T {
             if (self.isEmpty()) return null;
             if (self.getSize() == 1) return self.head.?.data;
@@ -551,4 +574,39 @@ test "peekHead basic functionality" {
     try list.prepend(64);
 
     try testing.expectEqual(@as(u8, 64), list.peekHead().?);
+}
+
+test "removeFirstOccurrence basic functionality" {
+    const allocator = testing.allocator;
+    var list = SinglyLinkedList(i32).init(allocator);
+    defer list.deinit();
+
+    try list.prepend(64);
+    try list.prepend(0);
+
+    try testing.expect(list.removeFirstOccurence(64));
+    try testing.expectEqual(@as(usize, 1), list.getSize());
+    // try remove when target is head
+    try testing.expect(list.removeFirstOccurence(0));
+    try testing.expect(list.isEmpty());
+}
+
+test "removeFirstOccurrence list is empty" {
+    const allocator = testing.allocator;
+    var list = SinglyLinkedList(i32).init(allocator);
+    defer list.deinit();
+
+    try testing.expect(!list.removeFirstOccurence(1000));
+}
+
+test "removeFirstOccurrence remove target not present" {
+    const allocator = testing.allocator;
+    var list = SinglyLinkedList(i32).init(allocator);
+    defer list.deinit();
+
+    try list.append(1);
+    try list.prepend(0);
+    try list.append(2);
+
+    try testing.expect(!list.removeFirstOccurence(1000));
 }

@@ -1,6 +1,7 @@
 const std = @import("std");
 const testing = std.testing;
 
+/// A generic singly linked list.
 pub fn SinglyLinkedList(comptime T: type) type {
     return struct {
         const Self = @This();
@@ -10,6 +11,7 @@ pub fn SinglyLinkedList(comptime T: type) type {
         head: ?*Node(T),
         size: usize,
 
+        /// Initialize an empty linked list with given allocator.
         pub fn init(allocator: std.mem.Allocator) Self {
             return Self{
                 .allocator = allocator,
@@ -18,18 +20,22 @@ pub fn SinglyLinkedList(comptime T: type) type {
             };
         }
 
+        /// Clears and cleans up all memory used by the list.
         pub fn deinit(self: *Self) void {
             self.clear();
         }
 
+        /// Check if the list is empty.
         pub fn isEmpty(self: *Self) bool {
             return self.size == 0 and self.head == null;
         }
 
+        /// Get the number of elements in the list.
         pub fn getSize(self: *Self) usize {
             return self.size;
         }
 
+        /// Add an element to the front of the list.
         pub fn prepend(self: *Self, data: T) !void {
             const newNode = try self.createNode(data);
 
@@ -38,6 +44,7 @@ pub fn SinglyLinkedList(comptime T: type) type {
             self.size += 1;
         }
 
+        /// Add an element to the end of the list.
         pub fn append(self: *Self, data: T) !void {
             const newNode = try self.createNode(data);
 
@@ -50,6 +57,8 @@ pub fn SinglyLinkedList(comptime T: type) type {
             self.size += 1;
         }
 
+        /// Look at the first element without removing it.
+        /// Returns null if the list is empty.
         pub fn peekHead(self: *Self) ?T {
             if (self.head) |head| {
                 return head.data;
@@ -57,6 +66,8 @@ pub fn SinglyLinkedList(comptime T: type) type {
             return null;
         }
 
+        /// Look at the last element without removing it.
+        /// Returns null if the list is empty.
         pub fn peekTail(self: *Self) ?T {
             if (self.getTail()) |tail| {
                 return tail.data;
@@ -64,6 +75,8 @@ pub fn SinglyLinkedList(comptime T: type) type {
             return null;
         }
 
+        /// Remove and return the first element.
+        /// Returns null if the list is empty.
         pub fn popHead(self: *Self) ?T {
             if (self.isEmpty()) return null;
 
@@ -77,6 +90,8 @@ pub fn SinglyLinkedList(comptime T: type) type {
             return data;
         }
 
+        /// Remove and return the last element.
+        /// Returns null if the list is empty
         pub fn popTail(self: *Self) ?T {
             if (self.isEmpty()) return null;
 
@@ -95,6 +110,7 @@ pub fn SinglyLinkedList(comptime T: type) type {
             return data;
         }
 
+        /// Remove all elements from the list.
         pub fn clear(self: *Self) void {
             if (self.isEmpty()) return;
 
@@ -103,6 +119,8 @@ pub fn SinglyLinkedList(comptime T: type) type {
             }
         }
 
+        /// Append another list to the end of this list.
+        /// The other list becomes empty after this operation.
         pub fn concat(self: *Self, other: *Self) void {
             if (other.isEmpty()) return;
 
@@ -119,6 +137,8 @@ pub fn SinglyLinkedList(comptime T: type) type {
             other.size = 0;
         }
 
+        /// Remove the first occurrence of the given value.
+        /// Returns true if an element was removed, false otherwise.
         pub fn removeFirstOccurence(self: *Self, toRemove: T) bool {
             if (self.isEmpty()) return false;
 
@@ -138,6 +158,8 @@ pub fn SinglyLinkedList(comptime T: type) type {
             return false;
         }
 
+        /// Remove all occurrences of the given value.
+        /// Returns true if at least one element was removed. false otherwise.
         pub fn removeAll(self: *Self, toRemove: T) bool {
             if (self.isEmpty()) return false;
 
@@ -165,6 +187,7 @@ pub fn SinglyLinkedList(comptime T: type) type {
             return hasRemoved;
         }
 
+        /// Check if the list contains a given value.
         pub fn contains(self: *Self, target_data: T) bool {
             var current = self.head;
             while (current) |node| {
@@ -174,6 +197,8 @@ pub fn SinglyLinkedList(comptime T: type) type {
             return false;
         }
 
+        /// Get the last element's value without removing it.
+        /// Returns null if the list is empty
         pub fn getLast(self: *Self) ?T {
             if (self.getTail()) |tail| {
                 return tail.data;
@@ -182,6 +207,7 @@ pub fn SinglyLinkedList(comptime T: type) type {
             return null;
         }
 
+        /// Reverse the order of elements in the list
         pub fn reverse(self: *Self) void {
             var current = self.head;
             var previous: ?*Node(T) = null;
@@ -201,10 +227,12 @@ pub fn SinglyLinkedList(comptime T: type) type {
             self.head = previous;
         }
 
+        /// Reverse the list using recursion.
         pub fn recursive_reverse(self: *Self) void {
             self.head = recursive_reverse_helper(self.head, null);
         }
 
+        /// Helper function for recursive reverse.
         fn recursive_reverse_helper(current: ?*Node(T), previous: ?*Node(T)) ?*Node(T) {
             if (current == null) {
                 return previous;
@@ -228,6 +256,7 @@ pub fn SinglyLinkedList(comptime T: type) type {
 
         // TODO: copy, deep copy of the list
 
+        /// Create an iterator for traversing the list.
         pub fn iterator(self: *Self) Iterator {
             return Iterator{
                 .current = self.head,
@@ -235,14 +264,18 @@ pub fn SinglyLinkedList(comptime T: type) type {
             };
         }
 
+        /// Iterator for traversing the list elements.
         const Iterator = struct {
             list: *Self,
             current: ?*Node(T),
 
+            /// Reset the iterator to the beginning of the list.
             pub fn reset(this: *Iterator) void {
                 this.current = this.list.head;
             }
 
+            /// Get the next element in the iteration.
+            /// Returns null when there are no more elements.
             pub fn next(this: *Iterator) ?T {
                 if (this.current) |node| {
                     const data = node.data;
@@ -254,6 +287,7 @@ pub fn SinglyLinkedList(comptime T: type) type {
         };
 
         // helper functions
+        /// Get a pointer to the last node in the list.
         fn getTail(self: *Self) ?*Node(T) {
             if (self.isEmpty()) return null;
 
@@ -264,6 +298,7 @@ pub fn SinglyLinkedList(comptime T: type) type {
             return current;
         }
 
+        /// Get a pointer to the second-to-last node in the list.
         fn getSecondToLast(self: *Self) ?*Node(T) {
             if (self.isEmpty() or self.head.?.next == null) return null;
 
@@ -274,12 +309,14 @@ pub fn SinglyLinkedList(comptime T: type) type {
             return current;
         }
 
+        /// Create a new node with the given data.
         fn createNode(self: *Self, data: T) !*Node(T) {
             const newNode = try self.allocator.create(Node(T));
             newNode.* = Node(T).init(data);
             return newNode;
         }
 
+        /// Remove the node that comes after the given node.
         fn removeAfter(self: *Self, current: *Node(T)) bool {
             if (current.next == null) return false;
 
@@ -294,6 +331,7 @@ pub fn SinglyLinkedList(comptime T: type) type {
     };
 }
 
+/// A node in the singly linked list.
 fn Node(comptime T: type) type {
     return struct {
         const Self = @This();
@@ -302,6 +340,7 @@ fn Node(comptime T: type) type {
         data: T,
         next: ?*Self,
 
+        /// Create a new node with the given data.
         fn init(data: T) Self {
             return Self{
                 .data = data,
@@ -309,6 +348,7 @@ fn Node(comptime T: type) type {
             };
         }
 
+        // Set the next node in the chain.
         fn setNext(self: *Self, next: ?*Self) void {
             self.next = next;
         }

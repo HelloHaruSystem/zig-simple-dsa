@@ -95,8 +95,6 @@ pub fn SinglyLinkedList(comptime T: type) type {
             return data;
         }
 
-        // TODO: clear
-        // TODO: check if you can just call deinit or move logic from deinit here????
         pub fn clear(self: *Self) void {
             if (self.isEmpty()) return;
 
@@ -129,54 +127,38 @@ pub fn SinglyLinkedList(comptime T: type) type {
                 return self.popHead() != null;
             }
 
-            var current: ?*Node(T) = self.head;
-            while (current.?.next != null) {
-                if (current.?.next.?.data == toRemove) {
-                    const nodeToRemove: *Node(T) = current.?.next.?;
-                    current.?.next = nodeToRemove.next;
-
-                    self.allocator.destroy(nodeToRemove);
-                    self.size -= 1;
-
-                    return true;
+            var current: *Node(T) = self.head.?;
+            while (current.next != null) {
+                if (current.next.?.data == toRemove) {
+                    return self.removeAfter(current);
                 }
-                current = current.?.next;
+                current = current.next.?;
             }
 
             return false;
         }
 
-        // TODO: remove all
-        // TODO: current implementation seems to work but check the implementation
-        // problems with null values compare to removeFirstOccurrence() method
         pub fn removeAll(self: *Self, toRemove: T) bool {
             if (self.isEmpty()) return false;
 
             var hasRemoved = false;
 
             // keep checking and removing if needed until head is not equal toRemove
-            while (self.head.?.data == toRemove) {
-                hasRemoved = self.popHead() != null;
+            while (self.head != null and self.head.?.data == toRemove) {
+                _ = self.popHead();
+                hasRemoved = true;
             }
+
             // check if list is empty after poping heads
-            if (self.head == null) return false;
+            if (self.head == null) return hasRemoved;
 
             // go through the list and remove all instaces of toRemove
             var current = self.head.?;
             while (current.next != null) {
                 if (current.next.?.data == toRemove) {
-                    const nodeToRemove: *Node(T) = current.next.?;
-                    current.next = nodeToRemove.next;
-
-                    self.allocator.destroy(nodeToRemove);
-                    self.size -= 1;
-
-                    hasRemoved = true;
-                }
-                if (current.next) |next| {
-                    current = next;
+                    hasRemoved = self.removeAfter(current);
                 } else {
-                    return hasRemoved;
+                    current = current.next.?;
                 }
             }
 
@@ -296,6 +278,18 @@ pub fn SinglyLinkedList(comptime T: type) type {
             const newNode = try self.allocator.create(Node(T));
             newNode.* = Node(T).init(data);
             return newNode;
+        }
+
+        fn removeAfter(self: *Self, current: *Node(T)) bool {
+            if (current.next == null) return false;
+
+            const nodeToRemove = current.next.?;
+            current.next = nodeToRemove.next;
+
+            self.allocator.destroy(nodeToRemove);
+            self.size -= 1;
+
+            return true;
         }
     };
 }

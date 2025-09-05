@@ -14,7 +14,6 @@
         "src",
         ".gitignore",
         "README.md",
-        // For example...
-        //"LICENSE",
+        "LICENSE",
     },
 }

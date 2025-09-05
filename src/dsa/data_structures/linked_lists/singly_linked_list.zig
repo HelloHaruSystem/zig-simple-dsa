@@ -19,10 +19,7 @@ pub fn SinglyLinkedList(comptime T: type) type {
         }
 
         pub fn deinit(self: *Self) void {
-            while (self.popHead() != null) {
-                // pop frees nodes so keep this loop body empty
-            }
-            // don't destroy self since the list will usually be stack allocated
+            self.clear();
         }
 
         pub fn isEmpty(self: *Self) bool {
@@ -99,6 +96,14 @@ pub fn SinglyLinkedList(comptime T: type) type {
         }
 
         // TODO: clear
+        // TODO: check if you can just call deinit or move logic from deinit here????
+        pub fn clear(self: *Self) void {
+            if (self.isEmpty()) return;
+
+            while (self.popHead() != null) {
+                // pop frees nodes so keep this loop body empty
+            }
+        }
 
         pub fn concat(self: *Self, other: *Self) void {
             if (other.isEmpty()) return;
@@ -142,6 +147,41 @@ pub fn SinglyLinkedList(comptime T: type) type {
         }
 
         // TODO: remove all
+        // TODO: current implementation seems to work but check the implementation
+        // problems with null values compare to removeFirstOccurrence() method
+        pub fn removeAll(self: *Self, toRemove: T) bool {
+            if (self.isEmpty()) return false;
+
+            var hasRemoved = false;
+
+            // keep checking and removing if needed until head is not equal toRemove
+            while (self.head.?.data == toRemove) {
+                hasRemoved = self.popHead() != null;
+            }
+            // check if list is empty after poping heads
+            if (self.head == null) return false;
+
+            // go through the list and remove all instaces of toRemove
+            var current = self.head.?;
+            while (current.next != null) {
+                if (current.next.?.data == toRemove) {
+                    const nodeToRemove: *Node(T) = current.next.?;
+                    current.next = nodeToRemove.next;
+
+                    self.allocator.destroy(nodeToRemove);
+                    self.size -= 1;
+
+                    hasRemoved = true;
+                }
+                if (current.next) |next| {
+                    current = next;
+                } else {
+                    return hasRemoved;
+                }
+            }
+
+            return hasRemoved;
+        }
 
         pub fn contains(self: *Self, target_data: T) bool {
             var current = self.head;
@@ -204,7 +244,7 @@ pub fn SinglyLinkedList(comptime T: type) type {
 
         // TODO: fromSlice
 
-        // TODO: copy deep copy of the list
+        // TODO: copy, deep copy of the list
 
         pub fn iterator(self: *Self) Iterator {
             return Iterator{
@@ -743,4 +783,61 @@ test "peekTail on empty list" {
     defer list.deinit();
 
     try testing.expectEqual(null, list.peekTail());
+}
+
+test "removeAll basic funtionality" {
+    const allocator = testing.allocator;
+    var list = SinglyLinkedList(u8).init(allocator);
+    defer list.deinit();
+
+    try list.prepend(32);
+    try list.prepend(16);
+    try list.prepend(8);
+    try list.prepend(32);
+    try list.prepend(2);
+
+    try testing.expect(list.removeAll(32));
+    try testing.expectEqual(@as(u8, 16), list.popTail());
+    try testing.expect(!list.contains(32));
+}
+
+test "removeALl on empty list" {
+    const allocator = testing.allocator;
+    var list = SinglyLinkedList(u8).init(allocator);
+    defer list.deinit();
+
+    try testing.expect(!list.removeAll(32));
+}
+
+test "removeALl doesn't affect non target values" {
+    const allocator = testing.allocator;
+    var list = SinglyLinkedList(u8).init(allocator);
+    defer list.deinit();
+
+    try list.prepend(32);
+    try list.prepend(16);
+    try list.prepend(8);
+    try list.prepend(32);
+    try list.prepend(2);
+
+    _ = list.removeAll(32);
+
+    try testing.expectEqual(@as(usize, 3), list.getSize());
+    try testing.expect(list.contains(16));
+    try testing.expect(list.contains(8));
+    try testing.expect(list.contains(2));
+    try testing.expect(!list.contains(32));
+}
+
+test "clear basic functionality" {
+    const allocator = testing.allocator;
+    var list = SinglyLinkedList(u8).init(allocator);
+    defer list.deinit();
+
+    try list.prepend(32);
+    try list.prepend(16);
+
+    list.clear();
+
+    try testing.expect(list.isEmpty());
 }

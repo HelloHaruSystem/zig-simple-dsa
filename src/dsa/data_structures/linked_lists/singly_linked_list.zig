@@ -248,7 +248,6 @@ pub fn SinglyLinkedList(comptime T: type) type {
             return recursive_reverse_helper(next, current);
         }
 
-        // TODO: mergeSort
         /// merge sort implementation to sort a singly linked list
         pub fn sort(self: *Self) !void {
             if (self.size <= 1) return;

@@ -249,6 +249,10 @@ pub fn SinglyLinkedList(comptime T: type) type {
         }
 
         // TODO: mergeSort
+        /// merge sort implementation to sort a singly linked list
+        pub fn sort(self: *Self) void {
+            _ = self;
+        }
 
         // TODO: toSlice
 
@@ -327,6 +331,20 @@ pub fn SinglyLinkedList(comptime T: type) type {
             self.size -= 1;
 
             return true;
+        }
+
+        fn getMiddle(self: *Self) ?*Node(T) {
+            if (self.head == null or self.size <= 1) return self.head;
+
+            const mid_index = self.size / 2;
+            var current = self.head;
+            var i: usize = 0;
+
+            while (current != null and i < mid_index) : (i += 1) {
+                current = current.?.next;
+            }
+
+            return current;
         }
     };
 }
@@ -874,4 +892,31 @@ test "clear basic functionality" {
     list.clear();
 
     try testing.expect(list.isEmpty());
+}
+
+test "get mid index basic functionality" {
+    const allocator = testing.allocator;
+    var list = SinglyLinkedList(i32).init(allocator);
+    defer list.deinit();
+
+    try list.prepend(64);
+    try list.prepend(-128);
+    try list.prepend(256);
+    const mid_node = list.getMiddle();
+
+    try testing.expectEqual(-128, mid_node.?.data);
+}
+
+test "get mid index on even-sized lists" {
+    const allocator = testing.allocator;
+    var list = SinglyLinkedList(i32).init(allocator);
+    defer list.deinit();
+
+    try list.prepend(64);
+    try list.prepend(-128);
+    try list.prepend(256);
+    try list.prepend(-512);
+    const mid_node = list.getMiddle();
+
+    try testing.expectEqual(-128, mid_node.?.data);
 }

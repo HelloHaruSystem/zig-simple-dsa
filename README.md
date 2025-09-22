@@ -29,7 +29,7 @@ Practicing data structures and algorithms while getting comfortable with Zig syn
 - [ ] Tree problems
 - [ ] Graph basics
 
-## Quick Start
+## Build the project
 ```bash
-zig build run src/main.zig
+zig build
 ```

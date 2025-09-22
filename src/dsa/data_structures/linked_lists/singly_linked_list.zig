@@ -268,7 +268,20 @@ pub fn SinglyLinkedList(comptime T: type) type {
             try self.merge(&left, &right);
         }
 
-        // TODO: toSlice
+        pub fn toSlice(self: *Self, allocator: std.mem.Allocator) ![]T {
+            if (self.isEmpty()) return &[_]T{};
+
+            var slice = try allocator.alloc(T, self.size);
+            var current = self.head;
+            var i: usize = 0;
+
+            while (current != null) : (i += 1) {
+                slice[i] = current.?.data;
+                current = current.?.next;
+            }
+
+            return slice;
+        }
 
         // TODO: fromSlice
 

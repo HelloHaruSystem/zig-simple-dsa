@@ -283,7 +283,18 @@ pub fn SinglyLinkedList(comptime T: type) type {
             return slice;
         }
 
-        // TODO: fromSlice
+        pub fn fromSlice(allocator: std.mem.Allocator, slice: []const T) !Self {
+            var new_list = Self.init(allocator);
+
+            var i: usize = slice.len;
+
+            while (i > 0) {
+                i -= 1;
+                try new_list.prepend(slice[i]);
+            }
+
+            return new_list;
+        }
 
         // TODO: copy, deep copy of the list
 
@@ -1121,4 +1132,14 @@ test "toSlice basic functionality" {
     for (slice, 0..) |number, i| {
         try testing.expectEqual(@as(i32, @intCast(i)), number);
     }
+}
+
+test "fromSlice basic functionality" {
+    const allocator = testing.allocator;
+    const slice = [_]i16{ 128, 256, 512, 1024 };
+
+    var list = try SinglyLinkedList(i16).fromSlice(allocator, &slice);
+    defer list.deinit();
+
+    try testing.expectEqual(@as(usize, 4), list.size);
 }

@@ -250,8 +250,23 @@ pub fn SinglyLinkedList(comptime T: type) type {
 
         // TODO: mergeSort
         /// merge sort implementation to sort a singly linked list
-        pub fn sort(self: *Self) void {
-            _ = self;
+        pub fn sort(self: *Self) !void {
+            if (self.size <= 1) return;
+
+            const n = self.size;
+            const mid_index = n / 2;
+
+            var left = try self.createSubList(0, mid_index);
+            var right = try self.createSubList(mid_index, n);
+            defer left.deinit();
+            defer right.deinit();
+
+            // divide
+            try left.sort();
+            try right.sort();
+
+            // conquer
+            try self.merge(&left, &right);
         }
 
         // TODO: toSlice
@@ -333,6 +348,7 @@ pub fn SinglyLinkedList(comptime T: type) type {
             return true;
         }
 
+        /// Gets a pointer to the middle node of the list
         fn getMiddle(self: *Self) ?*Node(T) {
             if (self.head == null or self.size <= 1) return self.head;
 
@@ -345,6 +361,63 @@ pub fn SinglyLinkedList(comptime T: type) type {
             }
 
             return current;
+        }
+
+        /// Create a sublist from the current list using a start and end index
+        /// End index is not inclusive
+        /// used for merge sort implementation
+        fn createSubList(self: *Self, start_index: usize, end_index: usize) !Self {
+            var new_list = Self.init(self.allocator);
+
+            if (start_index >= self.size or start_index >= end_index) {
+                return new_list;
+            }
+
+            var current = self.head;
+            var i: usize = 0;
+
+            // skip to start index
+            while (current != null and i < start_index) : (i += 1) {
+                current = current.?.next;
+            }
+
+            // copy elements from start_index to end_index
+            while (current != null and i < end_index) : (i += 1) {
+                try new_list.append(current.?.data);
+                current = current.?.next;
+            }
+
+            return new_list;
+        }
+
+        /// Merge helper function for merge sort
+        fn merge(self: *Self, left: *Self, right: *Self) !void {
+            // clear current list
+            self.clear();
+
+            var l_current = left.head;
+            var r_current = right.head;
+
+            while (l_current != null and r_current != null) {
+                if (l_current.?.data <= r_current.?.data) {
+                    try self.append(l_current.?.data);
+                    l_current = l_current.?.next;
+                } else {
+                    try self.append(r_current.?.data);
+                    r_current = r_current.?.next;
+                }
+            }
+
+            // add remaining elements
+            while (l_current != null) {
+                try self.append(l_current.?.data);
+                l_current = l_current.?.next;
+            }
+
+            while (r_current != null) {
+                try self.append(r_current.?.data);
+                r_current = r_current.?.next;
+            }
         }
     };
 }
@@ -919,4 +992,104 @@ test "get mid index on even-sized lists" {
     const mid_node = list.getMiddle();
 
     try testing.expectEqual(-128, mid_node.?.data);
+}
+
+test "create sub list basic functionality" {
+    const allocator = testing.allocator;
+    var list = SinglyLinkedList(i32).init(allocator);
+    defer list.deinit();
+
+    try list.prepend(64);
+    try list.prepend(-128);
+    try list.prepend(256);
+    try list.prepend(-512);
+
+    var sub_list_one = try list.createSubList(0, 2);
+    var sub_list_two = try list.createSubList(2, 4);
+    defer sub_list_one.deinit();
+    defer sub_list_two.deinit();
+
+    try testing.expectEqual(-512, sub_list_one.popHead());
+    try testing.expectEqual(256, sub_list_one.peekHead());
+    try testing.expectEqual(-128, sub_list_two.popHead());
+    try testing.expectEqual(64, sub_list_two.peekTail());
+}
+
+test "merge basic functionality" {
+    const allocator = testing.allocator;
+    var main_list = SinglyLinkedList(i32).init(allocator);
+    var left = SinglyLinkedList(i32).init(allocator);
+    var right = SinglyLinkedList(i32).init(allocator);
+    defer main_list.deinit();
+    defer left.deinit();
+    defer right.deinit();
+
+    try left.append(1);
+    try left.append(3);
+    try left.append(5);
+
+    try right.append(2);
+    try right.append(4);
+    try right.append(6);
+
+    try main_list.merge(&left, &right);
+
+    // should be merged in sorted order: 1, 2, 3, 4, 5, 6
+    try testing.expectEqual(@as(i32, 1), main_list.popHead().?);
+    try testing.expectEqual(@as(i32, 2), main_list.popHead().?);
+    try testing.expectEqual(@as(i32, 3), main_list.popHead().?);
+    try testing.expectEqual(@as(i32, 4), main_list.popHead().?);
+    try testing.expectEqual(@as(i32, 5), main_list.popHead().?);
+    try testing.expectEqual(@as(i32, 6), main_list.popHead().?);
+    try testing.expect(main_list.isEmpty());
+}
+
+test "sort basic functionality" {
+    const allocator = testing.allocator;
+    var list = SinglyLinkedList(i32).init(allocator);
+    defer list.deinit();
+
+    try list.append(64);
+    try list.append(-128);
+    try list.append(256);
+    try list.append(-512);
+
+    try list.sort();
+
+    try testing.expectEqual(@as(i32, -512), list.popHead().?);
+    try testing.expectEqual(@as(i32, -128), list.popHead().?);
+    try testing.expectEqual(@as(i32, 64), list.popHead().?);
+    try testing.expectEqual(@as(i32, 256), list.popHead().?);
+    try testing.expect(list.isEmpty());
+}
+
+test "sort single element" {
+    const allocator = testing.allocator;
+    var list = SinglyLinkedList(i32).init(allocator);
+    defer list.deinit();
+
+    try list.append(42);
+    try list.sort();
+
+    try testing.expectEqual(@as(i32, 42), list.popHead().?);
+    try testing.expect(list.isEmpty());
+}
+
+test "sort already sorted list" {
+    const allocator = testing.allocator;
+    var list = SinglyLinkedList(i32).init(allocator);
+    defer list.deinit();
+
+    try list.append(1);
+    try list.append(2);
+    try list.append(3);
+    try list.append(4);
+
+    try list.sort();
+
+    try testing.expectEqual(@as(i32, 1), list.popHead().?);
+    try testing.expectEqual(@as(i32, 2), list.popHead().?);
+    try testing.expectEqual(@as(i32, 3), list.popHead().?);
+    try testing.expectEqual(@as(i32, 4), list.popHead().?);
+    try testing.expect(list.isEmpty());
 }

@@ -139,7 +139,7 @@ pub fn SinglyLinkedList(comptime T: type) type {
 
         /// Remove the first occurrence of the given value.
         /// Returns true if an element was removed, false otherwise.
-        pub fn removeFirstOccurence(self: *Self, toRemove: T) bool {
+        pub fn removeFirstOccurrence(self: *Self, toRemove: T) bool {
             if (self.isEmpty()) return false;
 
             // if toRemove is head
@@ -852,10 +852,10 @@ test "removeFirstOccurrence basic functionality" {
     try list.prepend(64);
     try list.prepend(0);
 
-    try testing.expect(list.removeFirstOccurence(64));
+    try testing.expect(list.removeFirstOccurrence(64));
     try testing.expectEqual(@as(usize, 1), list.getSize());
     // try remove when target is head
-    try testing.expect(list.removeFirstOccurence(0));
+    try testing.expect(list.removeFirstOccurrence(0));
     try testing.expect(list.isEmpty());
 }
 
@@ -864,7 +864,7 @@ test "removeFirstOccurrence list is empty" {
     var list = SinglyLinkedList(i32).init(allocator);
     defer list.deinit();
 
-    try testing.expect(!list.removeFirstOccurence(1000));
+    try testing.expect(!list.removeFirstOccurrence(1000));
 }
 
 test "removeFirstOccurrence remove target not present" {
@@ -876,7 +876,7 @@ test "removeFirstOccurrence remove target not present" {
     try list.prepend(0);
     try list.append(2);
 
-    try testing.expect(!list.removeFirstOccurence(1000));
+    try testing.expect(!list.removeFirstOccurrence(1000));
 }
 
 test "popTail basic functionality" {
@@ -1157,4 +1157,27 @@ test "fromSlice basic functionality" {
     defer list.deinit();
 
     try testing.expectEqual(@as(usize, 4), list.size);
+}
+
+test "copy basic functionality" {
+    const allocator = testing.allocator;
+    var original = SinglyLinkedList(i32).init(allocator);
+    defer original.deinit();
+
+    try original.append(10);
+    try original.append(20);
+    try original.append(30);
+
+    var copied = try original.copy(allocator);
+    defer copied.deinit();
+
+    try testing.expectEqual(@as(usize, 3), copied.getSize());
+    try testing.expectEqual(@as(i32, 10), copied.popHead().?);
+    try testing.expectEqual(@as(i32, 20), copied.popHead().?);
+    try testing.expectEqual(@as(i32, 30), copied.popHead().?);
+    try testing.expect(copied.isEmpty());
+
+    // Check that original is unchanged
+    try testing.expectEqual(@as(usize, 3), original.getSize());
+    try testing.expectEqual(@as(i32, 10), original.peekHead().?);
 }

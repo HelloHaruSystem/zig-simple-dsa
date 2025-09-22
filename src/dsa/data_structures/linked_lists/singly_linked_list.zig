@@ -1105,3 +1105,20 @@ test "sort already sorted list" {
     try testing.expectEqual(@as(i32, 4), list.popHead().?);
     try testing.expect(list.isEmpty());
 }
+
+test "toSlice basic functionality" {
+    const allocator = testing.allocator;
+    var list = SinglyLinkedList(i32).init(allocator);
+    defer list.deinit();
+
+    try list.append(0);
+    try list.append(1);
+    try list.append(2);
+    try list.append(3);
+    const slice = try list.toSlice(allocator);
+    defer allocator.free(slice);
+
+    for (slice, 0..) |number, i| {
+        try testing.expectEqual(@as(i32, @intCast(i)), number);
+    }
+}

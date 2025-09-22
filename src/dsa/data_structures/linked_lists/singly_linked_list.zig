@@ -248,7 +248,7 @@ pub fn SinglyLinkedList(comptime T: type) type {
             return recursive_reverse_helper(next, current);
         }
 
-        /// merge sort implementation to sort a singly linked list
+        /// Merge sort implementation to sort a singly linked list
         pub fn sort(self: *Self) !void {
             if (self.size <= 1) return;
 
@@ -268,6 +268,7 @@ pub fn SinglyLinkedList(comptime T: type) type {
             try self.merge(&left, &right);
         }
 
+        /// Create a slice from the singly linked list
         pub fn toSlice(self: *Self, allocator: std.mem.Allocator) ![]T {
             if (self.isEmpty()) return &[_]T{};
 
@@ -283,6 +284,7 @@ pub fn SinglyLinkedList(comptime T: type) type {
             return slice;
         }
 
+        /// Create a new singly linked list from a slice
         pub fn fromSlice(allocator: std.mem.Allocator, slice: []const T) !Self {
             var new_list = Self.init(allocator);
 
@@ -296,7 +298,20 @@ pub fn SinglyLinkedList(comptime T: type) type {
             return new_list;
         }
 
-        // TODO: copy, deep copy of the list
+        /// Craete a copy of the singly linked list
+        pub fn copy(self: *Self, allocator: std.mem.Allocator) !Self {
+            var new_list = Self.init(allocator);
+
+            var current = self.head;
+
+            while (current != null) {
+                try new_list.prepend(current.?.data);
+                current = current.?.next;
+            }
+
+            new_list.reverse();
+            return new_list;
+        }
 
         /// Create an iterator for traversing the list.
         pub fn iterator(self: *Self) Iterator {

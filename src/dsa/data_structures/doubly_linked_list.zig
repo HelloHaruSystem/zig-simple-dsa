@@ -5,6 +5,18 @@ pub fn DoublyLinkedList(comptime T: type) type {
         const Self = @This();
 
         allocator: std.mem.Allocator,
+        head: ?*Node(T),
+        tail: ?*Node(T),
+        length: usize,
+
+        pub fn init(allocator: std.mem.Allocator) Self {
+            return Self{
+                .allocator = allocator,
+                .head = null,
+                .tail = null,
+                .length = 0,
+            };
+        }
     };
 }
 

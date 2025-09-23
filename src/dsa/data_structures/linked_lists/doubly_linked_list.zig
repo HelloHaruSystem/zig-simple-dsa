@@ -136,9 +136,52 @@ pub fn DoublyLinkedList(comptime T: type) type {
                 current = node.prev;
             }
 
-            // swap head and tal
+            // swap head and tail
             std.mem.swap(?*Node(T), &self.head, &self.tail);
         }
+
+        pub fn iterator(self: *Self) Iterator {
+            return Iterator{
+                .list = self,
+                .current = self.head,
+            };
+        }
+
+        const Iterator = struct {
+            list: *Self,
+            current: ?*Node(T),
+
+            pub fn reset(this: *Iterator) void {
+                this.current = this.list.head;
+            }
+
+            pub fn setAtHead(this: *Iterator) void {
+                this.current = this.list.head;
+            }
+
+            pub fn setAtTail(this: *Iterator) void {
+                this.current = this.list.tail;
+            }
+
+            pub fn next(this: *Iterator) ?T {
+                if (this.current) |node| {
+                    const value = node.value;
+                    this.current = node.next;
+                    return value;
+                }
+                return null;
+            }
+
+            pub fn prev(this: *Iterator) ?T {
+                if (this.current) |current_node| {
+                    if (current_node.prev) |prev_node| {
+                        this.current = prev_node;
+                        return prev_node.value;
+                    }
+                }
+                return null;
+            }
+        };
 
         pub fn sort(self: *Self) !void {
             if (self.size <= 1) return;

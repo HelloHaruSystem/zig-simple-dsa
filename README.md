@@ -10,7 +10,7 @@ Practicing data structures and algorithms while getting comfortable with Zig syn
 
 **Data Structures**
 - [ ] Arrays & Dynamic Arrays
-- [ ] Linked Lists
+- [x] Linked Lists (functionality complete, tests/docs in progress)
 - [ ] Ring Buffer
 - [ ] Stacks & Queues
 - [ ] Hash Maps
@@ -22,12 +22,6 @@ Practicing data structures and algorithms while getting comfortable with Zig syn
 - [ ] Sorting (Bubble, Merge, Quick)
 - [ ] Tree Traversals (DFS, BFS)
 - [ ] Basic Dynamic Programming
-
-**Practice Problems**
-- [ ] Array manipulation
-- [ ] String algorithms
-- [ ] Tree problems
-- [ ] Graph basics
 
 ## Build the project
 ```bash

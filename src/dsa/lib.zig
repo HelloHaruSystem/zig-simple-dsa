@@ -18,12 +18,14 @@ comptime {
 }
 
 // add data structures here
+/// A collection of data structures
 pub const DataStructures = struct {
     pub const singly_linked_list = singly_linked_list_module.SinglyLinkedList;
     pub const doubly_linked_list = doubly_linked_list_module.DoublyLinkedList;
 };
 
 // add algorithms here
+/// A collection of algorithms
 pub const Algorithms = struct {
     pub const Sort = sorting_module.Sorting;
     pub const Search = searching_module.Searching;

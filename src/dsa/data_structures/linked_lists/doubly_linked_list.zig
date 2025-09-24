@@ -1,14 +1,17 @@
 const std = @import("std");
 
+/// A generic doubly linked list
 pub fn DoublyLinkedList(comptime T: type) type {
     return struct {
         const Self = @This();
 
+        // fields
         allocator: std.mem.Allocator,
         head: ?*Node(T),
         tail: ?*Node(T),
         size: usize,
 
+        /// Initialize a new empty doubly linked list
         pub fn init(allocator: std.mem.Allocator) Self {
             return Self{
                 .allocator = allocator,
@@ -18,18 +21,22 @@ pub fn DoublyLinkedList(comptime T: type) type {
             };
         }
 
+        /// Clears and cleans up memory used by the list
         pub fn deinit(self: *Self) void {
             self.clear();
         }
 
+        /// Check if the list is empty
         pub fn isEmpty(self: *Self) bool {
             return self.size == 0 and self.head == null and self.tail == null;
         }
 
+        /// Get the size of the list
         pub fn getSize(self: *Self) usize {
             return self.size;
         }
 
+        /// Add a new element to the front of the list
         pub fn prepend(self: *Self, value: T) !void {
             const newNode = try self.createNode(value);
 
@@ -46,6 +53,7 @@ pub fn DoublyLinkedList(comptime T: type) type {
             self.size += 1;
         }
 
+        /// Add a new element to the end of the list
         pub fn append(self: *Self, value: T) !void {
             const newNode = try self.createNode(value);
 
@@ -62,6 +70,8 @@ pub fn DoublyLinkedList(comptime T: type) type {
             self.size += 1;
         }
 
+        /// Look at the first element without removing it
+        /// Returns null if the list is empty
         pub fn peekHead(self: *Self) ?T {
             if (self.head) |head| {
                 return head.value;
@@ -69,6 +79,8 @@ pub fn DoublyLinkedList(comptime T: type) type {
             return null;
         }
 
+        /// Look at the last element without removing it
+        /// Returns null if the list is empty
         pub fn peekTail(self: *Self) ?T {
             if (self.tail) |tail| {
                 return tail.value;
@@ -76,6 +88,8 @@ pub fn DoublyLinkedList(comptime T: type) type {
             return null;
         }
 
+        /// Remove and return the first element of the list
+        /// Returns null if the list is empty
         pub fn popHead(self: *Self) ?T {
             if (self.isEmpty()) return null;
 
@@ -96,6 +110,8 @@ pub fn DoublyLinkedList(comptime T: type) type {
             return value;
         }
 
+        /// Remove and return the last element of the list
+        /// Returns null if the list is empty
         pub fn popTail(self: *Self) ?T {
             if (self.isEmpty()) return null;
 
@@ -116,6 +132,7 @@ pub fn DoublyLinkedList(comptime T: type) type {
             return value;
         }
 
+        /// Remove all elements from the list
         pub fn clear(self: *Self) void {
             if (self.isEmpty()) return;
 
@@ -124,6 +141,7 @@ pub fn DoublyLinkedList(comptime T: type) type {
             }
         }
 
+        /// Reverse the order of elements in the list
         pub fn reverse(self: *Self) void {
             if (self.isEmpty()) return;
 
@@ -140,6 +158,12 @@ pub fn DoublyLinkedList(comptime T: type) type {
             std.mem.swap(?*Node(T), &self.head, &self.tail);
         }
 
+        /// Create an iterator for the list
+        /// The iterator starts at the head of the list
+        /// Use `setAtTail` to start at the tail
+        /// Use `setAtHead` to set the iterator back to the head
+        /// Use `next` and `prev` to traverse the list
+        /// Use `reset` to reset the iterator back to the head
         pub fn iterator(self: *Self) Iterator {
             return Iterator{
                 .list = self,
@@ -147,22 +171,29 @@ pub fn DoublyLinkedList(comptime T: type) type {
             };
         }
 
+        /// An iterator for the doubly linked list
         const Iterator = struct {
             list: *Self,
             current: ?*Node(T),
 
+            /// Reset the iterator back to the head of the list
             pub fn reset(this: *Iterator) void {
                 this.current = this.list.head;
             }
 
+            /// Set the iterator to the head of the list
             pub fn setAtHead(this: *Iterator) void {
                 this.current = this.list.head;
             }
 
+            /// Set the iterator to the tail of the list
             pub fn setAtTail(this: *Iterator) void {
                 this.current = this.list.tail;
             }
 
+            /// Move the iterator to the next element and return its value
+            /// Returns null if at the end of the list
+            /// Use `prev` to go backwards
             pub fn next(this: *Iterator) ?T {
                 if (this.current) |node| {
                     const value = node.value;
@@ -172,6 +203,9 @@ pub fn DoublyLinkedList(comptime T: type) type {
                 return null;
             }
 
+            /// Move the iterator to the previous element and return its value
+            /// Returns null if at the start of the list
+            /// Use `next` to go forwards
             pub fn prev(this: *Iterator) ?T {
                 if (this.current) |current_node| {
                     if (current_node.prev) |prev_node| {
@@ -183,6 +217,8 @@ pub fn DoublyLinkedList(comptime T: type) type {
             }
         };
 
+        /// Sort the list using merge sort
+        /// T must support the <= operator
         pub fn sort(self: *Self) !void {
             if (self.size <= 1) return;
 
@@ -204,13 +240,19 @@ pub fn DoublyLinkedList(comptime T: type) type {
         }
 
         // helper functions
+
+        /// Create a new node with the given value
+        /// Allocates memory for the node
         fn createNode(self: *Self, value: T) !*Node(T) {
             const newNode = try self.allocator.create(Node(T));
             newNode.* = Node(T).init(value);
             return newNode;
         }
 
-        // merge sort helper function
+        // merge sort helper functions
+
+        /// Create a sublist from start_index (inclusive) to end_index (exclusive)
+        /// If indices are out of bounds, returns an empty list
         fn createSubList(self: *Self, start_index: usize, end_index: usize) !Self {
             var new_list = Self.init(self.allocator);
 
@@ -235,7 +277,7 @@ pub fn DoublyLinkedList(comptime T: type) type {
             return new_list;
         }
 
-        // merge sort helper function
+        /// Merge two sorted lists into the current list
         fn merge(self: *Self, left: *Self, right: *Self) !void {
             self.clear();
 
@@ -266,6 +308,7 @@ pub fn DoublyLinkedList(comptime T: type) type {
     };
 }
 
+/// A node in the doubly linked list
 fn Node(comptime T: type) type {
     return struct {
         const Self = @This();
@@ -273,6 +316,7 @@ fn Node(comptime T: type) type {
         next: ?*Self,
         prev: ?*Self,
 
+        /// Initialize a new node with the given value
         fn init(value: T) Self {
             return Self{
                 .value = value,
@@ -281,10 +325,12 @@ fn Node(comptime T: type) type {
             };
         }
 
+        /// Set the next pointer of the node
         fn setNext(self: *Self, next: ?*Self) void {
             self.next = next;
         }
 
+        /// Set the previous pointer of the node
         fn setPrev(self: *Self, prev: ?*Self) void {
             self.prev = prev;
         }

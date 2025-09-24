@@ -3,6 +3,9 @@ const sorting_module = @import("./algorithms/sorting.zig");
 const searching_module = @import("./algorithms/searching.zig");
 
 // data structures
+// arrays
+const ring_buffer_module = @import("./data_structures/arrays/ring_buffer.zig");
+// linked lists
 const singly_linked_list_module = @import("./data_structures/linked_lists/singly_linked_list.zig");
 const doubly_linked_list_module = @import("./data_structures/linked_lists/doubly_linked_list.zig");
 
@@ -13,6 +16,9 @@ comptime {
     _ = searching_module;
 
     // data structures
+    //arrays
+    _ = ring_buffer_module;
+    // linked lists
     _ = singly_linked_list_module;
     _ = doubly_linked_list_module;
 }
@@ -20,6 +26,9 @@ comptime {
 // add data structures here
 /// A collection of data structures
 pub const DataStructures = struct {
+    // arrays
+    pub const ring_buffer = ring_buffer_module.RingBuffer;
+    // linked lists
     pub const singly_linked_list = singly_linked_list_module.SinglyLinkedList;
     pub const doubly_linked_list = doubly_linked_list_module.DoublyLinkedList;
 };

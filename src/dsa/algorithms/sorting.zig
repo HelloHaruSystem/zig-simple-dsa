@@ -1,9 +1,13 @@
 const std = @import("std");
 const testing = std.testing;
 
+/// A collection of sorting algorithms
 pub const Sorting = struct {
-    // time complexity worst case O(n^2)
-    // space complexity O(1)
+    /// Bubble sort algorithm
+    /// T must support the > operator
+    /// Sorts the array in place
+    /// time complexity worst case O(n^2)
+    /// space complexity O(1)
     pub fn bubbleSort(comptime T: type, arr: []T) void {
         if (arr.len <= 1) return;
 
@@ -24,8 +28,11 @@ pub const Sorting = struct {
         }
     }
 
-    // time complexity worst case O(n log n)
-    // space complexity O(n)
+    /// Merge sort algorithm
+    /// T must support the <= operator
+    /// Sorts the array in place
+    /// Time complexity worst case O(n log n)
+    /// Space complexity O(n)
     pub fn mergeSort(allocator: std.mem.Allocator, comptime T: type, arr: []T) !void {
         if (arr.len <= 1) return;
 
@@ -50,8 +57,9 @@ pub const Sorting = struct {
         merge(T, arr, left_half, right_half);
     }
 
-    // merge function
-    // helper functions for merge sort
+    /// Merge two sorted arrays into the original array
+    /// T must support the <= operator
+    /// Helper function for merge sort
     fn merge(comptime T: type, original_array: []T, left_array: []const T, right_array: []const T) void {
         const left_size: usize = left_array.len;
         const right_size: usize = right_array.len;
@@ -89,8 +97,6 @@ pub const Sorting = struct {
     }
 };
 
-// tests
-// bubble sort
 test "bubbleSort basic functionality" {
     var arr = [_]i32{ 64, 34, 25, 12, 22, 11, 90 };
     const expected = [_]i32{ 11, 12, 22, 25, 34, 64, 90 };
@@ -135,7 +141,6 @@ test "bubbleSort with duplicates" {
     try testing.expectEqualSlices(i32, &expected, &arr);
 }
 
-// merge sort
 test "merge sort basic functionality" {
     const allocator = testing.allocator;
 

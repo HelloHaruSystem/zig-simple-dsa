@@ -1,4 +1,5 @@
 const std = @import("std");
+const testing = std.testing;
 
 /// A generic doubly linked list
 pub fn DoublyLinkedList(comptime T: type) type {
@@ -335,4 +336,403 @@ fn Node(comptime T: type) type {
             self.prev = prev;
         }
     };
+}
+
+// tests
+test "DoublyLinkedList init creates empty list" {
+    const allocator = testing.allocator;
+    var list = DoublyLinkedList(u8).init(allocator);
+    defer list.deinit();
+
+    try testing.expect(list.isEmpty());
+    try testing.expectEqual(null, list.peekHead());
+    try testing.expectEqual(null, list.peekTail());
+    try testing.expectEqual(null, list.popHead());
+    try testing.expectEqual(null, list.popTail());
+}
+
+test "DoublyLinkedList deinit cleans up memory" {
+    const allocator = testing.allocator;
+    var list = DoublyLinkedList(i32).init(allocator);
+
+    try list.prepend(-255);
+    try list.prepend(255);
+    try list.prepend(0);
+
+    list.deinit();
+    // If there's a memory leak, the test allocator will catch it
+}
+
+test "isEmpty returns true for a non empty list true" {
+    const allocator = testing.allocator;
+    var list = DoublyLinkedList(i8).init(allocator);
+    defer list.deinit();
+
+    try testing.expect(list.isEmpty());
+}
+
+test "isEmpty returns false for a non empty list true" {
+    const allocator = testing.allocator;
+    var list = DoublyLinkedList(u16).init(allocator);
+    defer list.deinit();
+
+    try list.prepend(512);
+
+    try testing.expect(!list.isEmpty());
+}
+
+test "getSize basic functionality" {
+    const allocator = testing.allocator;
+    var list = DoublyLinkedList(u16).init(allocator);
+    defer list.deinit();
+
+    try list.prepend(32);
+
+    try testing.expectEqual(1, list.getSize());
+}
+
+test "getSize returns 0 with empty list" {
+    const allocator = testing.allocator;
+    var list = DoublyLinkedList(u16).init(allocator);
+    defer list.deinit();
+
+    try testing.expectEqual(0, list.getSize());
+}
+
+test "Prepend single element" {
+    const allocator = testing.allocator;
+    var list = DoublyLinkedList(i32).init(allocator);
+    defer list.deinit();
+
+    try list.prepend(54);
+
+    try testing.expect(!list.isEmpty());
+    try testing.expect(list.head != null);
+    try testing.expectEqual(@as(i32, 54), list.head.?.value);
+}
+
+test "prepend multiple elements maintains LIFO order" {
+    const allocator = testing.allocator;
+    var list = DoublyLinkedList(i32).init(allocator);
+    defer list.deinit();
+
+    try list.prepend(1);
+    try list.prepend(2);
+    try list.prepend(3);
+
+    try testing.expectEqual(@as(i32, 3), list.head.?.value);
+    try testing.expectEqual(@as(i32, 2), list.head.?.next.?.value);
+    try testing.expectEqual(@as(i32, 1), list.head.?.next.?.next.?.value);
+}
+
+test "popHead from empty list returns null" {
+    const allocator = testing.allocator;
+    var list = DoublyLinkedList(i32).init(allocator);
+    defer list.deinit();
+
+    const result = list.popHead();
+    try testing.expect(result == null);
+}
+
+test "iterator on empty list" {
+    const allocator = testing.allocator;
+    var list = DoublyLinkedList(i32).init(allocator);
+    defer list.deinit();
+
+    var iter = list.iterator();
+    try testing.expect(iter.next() == null);
+}
+
+test "iterator traverses single element" {
+    const allocator = testing.allocator;
+    var list = DoublyLinkedList(i32).init(allocator);
+    defer list.deinit();
+
+    try list.prepend(42);
+
+    var iter = list.iterator();
+    try testing.expectEqual(@as(i32, 42), iter.next().?);
+    try testing.expect(iter.next() == null);
+}
+
+test "iterator traverses multiple elements" {
+    const allocator = testing.allocator;
+    var list = DoublyLinkedList(i32).init(allocator);
+    defer list.deinit();
+
+    try list.prepend(1);
+    try list.prepend(2);
+    try list.prepend(3);
+
+    var iter = list.iterator();
+    try testing.expectEqual(@as(i32, 3), iter.next().?);
+    try testing.expectEqual(@as(i32, 2), iter.next().?);
+    try testing.expectEqual(@as(i32, 1), iter.next().?);
+    try testing.expect(iter.next() == null);
+}
+
+test "iterator traverses multiple elements backwards" {
+    const allocator = testing.allocator;
+    var list = DoublyLinkedList(i32).init(allocator);
+    defer list.deinit();
+
+    try list.prepend(1);
+    try list.prepend(2);
+    try list.prepend(3);
+
+    var iter = list.iterator();
+    iter.setAtTail();
+
+    try testing.expectEqual(@as(i32, 2), iter.prev().?);
+    try testing.expectEqual(@as(i32, 3), iter.prev().?);
+    try testing.expect(iter.prev() == null);
+}
+
+test "iterator setAtHead functionality" {
+    const allocator = testing.allocator;
+    var list = DoublyLinkedList(i32).init(allocator);
+    defer list.deinit();
+
+    try list.append(1);
+    try list.append(2);
+    try list.append(3);
+
+    var iter = list.iterator();
+    iter.setAtTail();
+    iter.setAtHead(); // This is the only method not tested elsewhere
+
+    try testing.expectEqual(@as(i32, 1), iter.next().?);
+    try testing.expectEqual(@as(i32, 2), iter.next().?);
+    try testing.expectEqual(@as(i32, 3), iter.next().?);
+}
+
+test "iterator reset functionality" {
+    const allocator = testing.allocator;
+    var list = DoublyLinkedList(i32).init(allocator);
+    defer list.deinit();
+
+    try list.prepend(1);
+    try list.prepend(2);
+
+    var iter = list.iterator();
+    try testing.expectEqual(@as(i32, 2), iter.next().?);
+    try testing.expectEqual(@as(i32, 1), iter.next().?);
+    try testing.expect(iter.next() == null);
+
+    // Reset and traverse again
+    iter.reset();
+    try testing.expectEqual(@as(i32, 2), iter.next().?);
+    try testing.expectEqual(@as(i32, 1), iter.next().?);
+    try testing.expect(iter.next() == null);
+}
+
+test "memory allocation failure" {
+    var failing_allocator = testing.FailingAllocator.init(testing.allocator, .{ .fail_index = 0 });
+    const allocator = failing_allocator.allocator();
+
+    var list = DoublyLinkedList(i32).init(allocator);
+    defer list.deinit();
+
+    try testing.expectError(error.OutOfMemory, list.prepend(42));
+}
+
+test "with custom struct type" {
+    const allocator = testing.allocator;
+
+    const Point = struct {
+        x: i32,
+        y: i32,
+
+        fn equal(self: @This(), other: @This()) bool {
+            return self.x == other.x and self.y == other.y;
+        }
+    };
+
+    var list = DoublyLinkedList(Point).init(allocator);
+    defer list.deinit();
+
+    const p1 = Point{ .x = 1, .y = 2 };
+    const p2 = Point{ .x = 3, .y = 4 };
+
+    try list.prepend(p1);
+    try list.prepend(p2);
+
+    const popped = list.popHead().?;
+    try testing.expect(popped.equal(p2));
+
+    const remaining = list.popHead().?;
+    try testing.expect(remaining.equal(p1));
+}
+
+test "basic reverse functionality" {
+    const allocator = testing.allocator;
+    var list = DoublyLinkedList(u32).init(allocator);
+    defer list.deinit();
+
+    const values = [_]u32{ 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096 };
+
+    var i: usize = 0;
+    while (i < values.len) : (i += 1) {
+        try list.prepend(values[i]);
+    }
+
+    list.reverse();
+
+    for (values) |expected_value| {
+        const actual = list.popHead().?;
+        try testing.expectEqual(expected_value, actual);
+    }
+
+    try testing.expect(list.isEmpty());
+    try testing.expect(list.head == null);
+}
+
+test "append basic funtionality" {
+    const allocator = testing.allocator;
+    var list = DoublyLinkedList(u8).init(allocator);
+    defer list.deinit();
+
+    try list.append(255);
+    try list.append(0);
+
+    try testing.expect(!list.isEmpty());
+    try testing.expectEqual(@as(usize, 2), list.getSize());
+    try testing.expectEqual(@as(u8, 255), list.popHead());
+    try testing.expectEqual(@as(u8, 0), list.popHead());
+    try testing.expect(list.isEmpty());
+}
+
+test "append vs prepend order" {
+    const allocator = testing.allocator;
+    var list = DoublyLinkedList(i32).init(allocator);
+    defer list.deinit();
+
+    try list.append(1);
+    try list.prepend(0);
+    try list.append(2);
+
+    // Should be: 0 -> 1 -> 2
+    try testing.expectEqual(@as(i32, 0), list.popHead().?);
+    try testing.expectEqual(@as(i32, 1), list.popHead().?);
+    try testing.expectEqual(@as(i32, 2), list.popHead().?);
+}
+
+test "peekHead basic functionality" {
+    const allocator = testing.allocator;
+    var list = DoublyLinkedList(i32).init(allocator);
+    defer list.deinit();
+
+    try list.prepend(64);
+
+    try testing.expectEqual(@as(i32, 64), list.peekHead().?);
+}
+
+test "popTail basic functionality" {
+    const allocator = testing.allocator;
+    var list = DoublyLinkedList(i32).init(allocator);
+    defer list.deinit();
+
+    try list.prepend(1);
+    try list.prepend(0);
+    try list.prepend(2);
+
+    try testing.expectEqual(@as(i32, 1), list.popTail());
+    try testing.expectEqual(@as(usize, 2), list.getSize());
+    try testing.expectEqual(@as(i32, 0), list.popTail());
+    // try with head
+    try testing.expectEqual(@as(i32, 2), list.popTail());
+    try testing.expect(list.isEmpty());
+}
+
+test "peekTail basic functionality" {
+    const allocator = testing.allocator;
+    var list = DoublyLinkedList(i32).init(allocator);
+    defer list.deinit();
+
+    try list.prepend(1);
+    try list.prepend(0);
+
+    try testing.expectEqual(@as(i32, 1), list.peekTail());
+}
+
+test "clear basic functionality" {
+    const allocator = testing.allocator;
+    var list = DoublyLinkedList(u8).init(allocator);
+    defer list.deinit();
+
+    try list.prepend(32);
+    try list.prepend(16);
+
+    list.clear();
+
+    try testing.expect(list.isEmpty());
+}
+
+test "create sub list basic functionality" {
+    const allocator = testing.allocator;
+    var list = DoublyLinkedList(i32).init(allocator);
+    defer list.deinit();
+
+    try list.prepend(64);
+    try list.prepend(-128);
+    try list.prepend(256);
+    try list.prepend(-512);
+
+    var sub_list_one = try list.createSubList(0, 2);
+    var sub_list_two = try list.createSubList(2, 4);
+    defer sub_list_one.deinit();
+    defer sub_list_two.deinit();
+
+    try testing.expectEqual(-512, sub_list_one.popHead());
+    try testing.expectEqual(256, sub_list_one.peekHead());
+    try testing.expectEqual(-128, sub_list_two.popHead());
+    try testing.expectEqual(64, sub_list_two.peekTail());
+}
+
+test "merge basic functionality" {
+    const allocator = testing.allocator;
+    var main_list = DoublyLinkedList(i32).init(allocator);
+    var left = DoublyLinkedList(i32).init(allocator);
+    var right = DoublyLinkedList(i32).init(allocator);
+    defer main_list.deinit();
+    defer left.deinit();
+    defer right.deinit();
+
+    try left.append(1);
+    try left.append(3);
+    try left.append(5);
+
+    try right.append(2);
+    try right.append(4);
+    try right.append(6);
+
+    try main_list.merge(&left, &right);
+
+    // should be merged in sorted order: 1, 2, 3, 4, 5, 6
+    try testing.expectEqual(@as(i32, 1), main_list.popHead().?);
+    try testing.expectEqual(@as(i32, 2), main_list.popHead().?);
+    try testing.expectEqual(@as(i32, 3), main_list.popHead().?);
+    try testing.expectEqual(@as(i32, 4), main_list.popHead().?);
+    try testing.expectEqual(@as(i32, 5), main_list.popHead().?);
+    try testing.expectEqual(@as(i32, 6), main_list.popHead().?);
+    try testing.expect(main_list.isEmpty());
+}
+
+test "sort basic functionality" {
+    const allocator = testing.allocator;
+    var list = DoublyLinkedList(i32).init(allocator);
+    defer list.deinit();
+
+    try list.append(64);
+    try list.append(-128);
+    try list.append(256);
+    try list.append(-512);
+
+    try list.sort();
+
+    try testing.expectEqual(@as(i32, -512), list.popHead().?);
+    try testing.expectEqual(@as(i32, -128), list.popHead().?);
+    try testing.expectEqual(@as(i32, 64), list.popHead().?);
+    try testing.expectEqual(@as(i32, 256), list.popHead().?);
+    try testing.expect(list.isEmpty());
 }

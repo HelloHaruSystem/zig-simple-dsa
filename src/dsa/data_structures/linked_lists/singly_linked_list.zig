@@ -485,7 +485,6 @@ fn Node(comptime T: type) type {
 }
 
 // tests
-// init and deinit tests
 test "SinglyLinkedList init creates empty list" {
     const allocator = testing.allocator;
     var list = SinglyLinkedList(u8).init(allocator);

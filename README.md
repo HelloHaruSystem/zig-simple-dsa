@@ -11,7 +11,7 @@ Practicing data structures and algorithms while getting comfortable with Zig syn
 **Data Structures**
 - [ ] Arrays & Dynamic Arrays
 - [x] Linked Lists
-- [ ] Ring Buffer
+- [x] Ring Buffer (still needs testing/docs)
 - [ ] Stacks & Queues
 - [ ] Hash Maps
 - [ ] Binary Trees

@@ -16,7 +16,7 @@ comptime {
     _ = searching_module;
 
     // data structures
-    //arrays
+    // arrays
     _ = ring_buffer_module;
     // linked lists
     _ = singly_linked_list_module;

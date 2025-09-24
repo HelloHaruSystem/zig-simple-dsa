@@ -1,9 +1,12 @@
 const std = @import("std");
 const testing = std.testing;
 
+/// Searching algorithms
 pub const Searching = struct {
-    // time complexity worst case O(n)
-    // space complexity O(1)
+    /// Perform a linear search on the array to find the target value
+    /// Returns the index of the target if found, otherwise returns null
+    /// time complexity worst case O(n)
+    /// space complexity O(1)
     pub fn linearSearch(comptime T: type, arr: []const T, target: T) ?usize {
         for (arr, 0..) |number, i| {
             if (number == target) {
@@ -13,8 +16,12 @@ pub const Searching = struct {
         return null;
     }
 
-    // time complexity worst case O(log n)
-    // space complexity O(1)
+    /// Perform a binary search on a sorted array to find the target value
+    /// Returns the index of the target if found, otherwise returns null
+    /// The array must be sorted in ascending order
+    /// If the array is empty, returns null
+    /// time complexity worst case O(log n)
+    /// space complexity O(1)
     pub fn binarySearch(comptime T: type, arr: []const T, target: T) ?usize {
         if (arr.len == 0) return null;
 
@@ -39,8 +46,6 @@ pub const Searching = struct {
     }
 };
 
-// tests
-// binary search
 test "binary search basic funtionality" {
     const sorted_array = [_]i32{ 11, 12, 22, 25, 34, 64, 90 };
     const target_number = 64;

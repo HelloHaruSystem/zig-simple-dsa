@@ -2,7 +2,7 @@
 
 ## Prerequisites (needed as underlying structures)
 - [ ] Dynamic Array
-- [ ] Ring Buffer
+- [x] Ring Buffer
 
 ## Main Structures
 - [ ] Stack (using dynamic array)

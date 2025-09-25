@@ -12,6 +12,7 @@ pub fn RingBuffer(comptime T: type) type {
         read_index: usize,
         size: usize,
 
+        /// Initialize an empty ring buffer with the given capacity
         pub fn init(allocator: std.mem.Allocator, buffer_capacity: usize) !Self {
             return Self{
                 .allocator = allocator,
@@ -22,18 +23,24 @@ pub fn RingBuffer(comptime T: type) type {
             };
         }
 
+        /// Frees the memory used by the ring buffer
         pub fn deinit(self: *Self) void {
             self.allocator.free(self.buffer);
         }
 
+        /// Check if the ring buffer is empty
         pub fn isEmpty(self: *Self) bool {
             return self.size == 0;
         }
 
+        /// Check if the ring buffer is full
         pub fn isFull(self: *Self) bool {
             return self.size == self.buffer.len;
         }
 
+        /// Push a new element unto the ring buffer
+        /// returns null if push doesn't overrite any existing values
+        /// returns the value it overrites in case the ring buffer is full
         pub fn push(self: *Self, data: T) ?T {
             var overwritten: ?T = null;
             if (self.isFull()) {
@@ -49,6 +56,8 @@ pub fn RingBuffer(comptime T: type) type {
             return overwritten;
         }
 
+        /// Follows the last in first out principle
+        /// returns and removes the last added item in the ring buffer
         pub fn pop(self: *Self) ?T {
             if (self.size == 0) return null;
 
@@ -59,6 +68,9 @@ pub fn RingBuffer(comptime T: type) type {
             return data;
         }
 
+        /// Follows the last in first out principle
+        /// returns the last added item in the ring buffer
+        /// without removing it
         pub fn peek(self: *Self) ?T {
             if (self.size == 0) return null;
 

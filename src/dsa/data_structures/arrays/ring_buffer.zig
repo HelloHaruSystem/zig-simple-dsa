@@ -89,3 +89,74 @@ test "RingBuffer init creates an empty ring buffer" {
     try testing.expect(ring_buffer.isEmpty());
     try testing.expect(ring_buffer.size == 0);
 }
+
+test "RingBuffer deinint cleans up memory" {
+    const allocator = testing.allocator;
+    var buffer = try RingBuffer(i32).init(allocator, 128);
+
+    _ = buffer.push(-2);
+    _ = buffer.push(512);
+
+    buffer.deinit();
+    // If there's a memory leak, the test allocator will catch it
+}
+
+test "isEmpty returns true on empty buffer" {
+    const allocator = testing.allocator;
+    var buffer = try RingBuffer(i16).init(allocator, 64);
+    defer buffer.deinit();
+
+    _ = buffer.push(-32);
+    _ = buffer.pop();
+
+    try testing.expect(buffer.isEmpty());
+}
+
+test "isEmpty returns fall on non empty" {
+    const allocator = testing.allocator;
+    var buffer = try RingBuffer(i16).init(allocator, 64);
+    defer buffer.deinit();
+
+    _ = buffer.push(-32);
+
+    try testing.expect(!buffer.isEmpty());
+}
+
+test "isFull returns false on non full buffer" {
+    const allocator = testing.allocator;
+    var buffer = try RingBuffer(u16).init(allocator, 2);
+    defer buffer.deinit();
+
+    _ = buffer.push(1024);
+
+    try testing.expect(!buffer.isFull());
+}
+
+test "isFull returns true on full buffer" {
+    const allocator = testing.allocator;
+    var buffer = try RingBuffer(u8).init(allocator, 1);
+    defer buffer.deinit();
+
+    _ = buffer.push(255);
+
+    try testing.expect(buffer.isFull());
+}
+
+test "push basic functionality" {
+    const allocator = testing.allocator;
+    var buffer = try RingBuffer(u8).init(allocator, 2);
+    defer buffer.deinit();
+
+    _ = buffer.push(255);
+    _ = buffer.push(8);
+
+    try testing.expectEqual(buffer.size, 2);
+    try testing.expectEqual(@as(u8, 255), buffer.push(16));
+    try testing.expectEqual(buffer.size, 2);
+}
+
+test "push returns null if it doesn't overwrite existing data" {
+    const allocator = testing.allocator;
+    var buffer = try RingBuffer(i32).init(allocator, 2);
+    defer buffer.deinit();
+}

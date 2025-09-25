@@ -1,4 +1,5 @@
 const std = @import("std");
+const testing = std.testing;
 
 /// Ring buffer aka Circular buffer
 pub fn RingBuffer(comptime T: type) type {
@@ -77,4 +78,14 @@ pub fn RingBuffer(comptime T: type) type {
             return self.buffer[self.read_index];
         }
     };
+}
+
+// Test
+test "RingBuffer init creates an empty ring buffer" {
+    const allocator = testing.allocator;
+    var ring_buffer = try RingBuffer(u8).init(allocator, 256);
+    defer ring_buffer.deinit();
+
+    try testing.expect(ring_buffer.isEmpty());
+    try testing.expect(ring_buffer.size == 0);
 }

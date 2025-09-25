@@ -45,20 +45,20 @@ pub fn RingBuffer(comptime T: type) type {
         pub fn push(self: *Self, data: T) ?T {
             var overwritten: ?T = null;
             if (self.isFull()) {
-                overwritten = self.buffer[self.read_index];
+                overwritten = self.buffer[self.write_index];
                 self.read_index = (self.read_index + 1) % self.buffer.len;
-                self.size -= 1;
+            } else {
+                self.size += 1;
             }
 
             self.buffer[self.write_index] = data;
             self.write_index = (self.write_index + 1) % self.buffer.len;
-            self.size += 1;
 
             return overwritten;
         }
 
-        /// Follows the last in first out principle
-        /// returns and removes the last added item in the ring buffer
+        /// Follows the first in first out principle
+        /// returns and removes the first added item in the ring buffer
         pub fn pop(self: *Self) ?T {
             if (self.size == 0) return null;
 
@@ -69,8 +69,8 @@ pub fn RingBuffer(comptime T: type) type {
             return data;
         }
 
-        /// Follows the last in first out principle
-        /// returns the last added item in the ring buffer
+        /// Follows the first in first out principle
+        /// returns the first added item in the ring buffer
         /// without removing it
         pub fn peek(self: *Self) ?T {
             if (self.size == 0) return null;
@@ -159,4 +159,44 @@ test "push returns null if it doesn't overwrite existing data" {
     const allocator = testing.allocator;
     var buffer = try RingBuffer(i32).init(allocator, 2);
     defer buffer.deinit();
+
+    try testing.expectEqual(null, buffer.push(1024));
+}
+
+test "pop basic funtionality" {
+    const allocator = testing.allocator;
+    var buffer = try RingBuffer(u16).init(allocator, 3);
+    defer buffer.deinit();
+
+    _ = buffer.push(234);
+
+    try testing.expectEqual(1, buffer.size);
+    try testing.expectEqual(@as(u16, 234), buffer.pop());
+    try testing.expectEqual(0, buffer.size);
+    try testing.expectEqual(null, buffer.pop());
+}
+
+test "peek returns value but doesn't decrease size" {
+    const allocator = testing.allocator;
+    var buffer = try RingBuffer(i8).init(allocator, 1);
+    defer buffer.deinit();
+
+    _ = buffer.push(-12);
+
+    try testing.expectEqual(@as(i8, -12), buffer.peek());
+    try testing.expectEqual(1, buffer.size);
+}
+
+test "FIFO ordering" {
+    const allocator = testing.allocator;
+    var buffer = try RingBuffer(u8).init(allocator, 3);
+    defer buffer.deinit();
+
+    _ = buffer.push(1);
+    _ = buffer.push(2);
+    _ = buffer.push(3);
+
+    try testing.expectEqual(@as(u8, 1), buffer.pop().?);
+    try testing.expectEqual(@as(u8, 2), buffer.pop().?);
+    try testing.expectEqual(@as(u8, 3), buffer.pop().?);
 }

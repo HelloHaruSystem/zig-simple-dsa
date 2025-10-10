@@ -119,7 +119,7 @@ test "Dynamic array init creates an empty array with the length of the given cap
     try testing.expect(new_dynamic_array.buffer.len == 10);
 }
 
-test "Append appends the given value at the end of the dynamic array" {
+test "Append appends the given value at the en(self.buffer.len * 3) / 2;d of the dynamic array" {
     const allocator = testing.allocator;
     var new_dynamic_array = try DynamicArray(u8).initDefault(allocator);
     defer new_dynamic_array.deinit();

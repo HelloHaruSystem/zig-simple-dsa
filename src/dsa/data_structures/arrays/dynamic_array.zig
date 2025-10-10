@@ -44,6 +44,19 @@ pub fn DynamicArray(comptime T: type) type {
             self.size += 1;
         }
 
+        pub fn remove(self: *Self, index_to_remove: usize) bool {
+            if (index_to_remove >= self.size) return false;
+
+            if (index_to_remove < self.size - 1) {
+                const dst = self.buffer[index_to_remove .. self.size - 1];
+                const src = self.buffer[index_to_remove + 1 .. self.size];
+                std.mem.copyForwards(T, dst, src);
+            }
+
+            self.size -= 1;
+            return true;
+        }
+
         pub fn get(self: *const Self, index: usize) ?T {
             if (index >= self.size) return null;
             return self.buffer[index];

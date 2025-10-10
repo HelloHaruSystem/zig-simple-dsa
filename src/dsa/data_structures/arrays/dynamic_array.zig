@@ -11,9 +11,11 @@ pub fn DynamicArray(comptime T: type) type {
         size: usize,
 
         pub fn init(allocator: std.mem.Allocator, capacity: usize) !Self {
+            const cap = if (capacity == 0) 1 else capacity;
+
             return Self{
                 .allocator = allocator,
-                .buffer = try allocator.alloc(T, capacity),
+                .buffer = try allocator.alloc(T, cap),
                 .size = 0,
             };
         }
@@ -24,6 +26,10 @@ pub fn DynamicArray(comptime T: type) type {
 
         pub fn deinit(self: *Self) void {
             self.allocator.free(self.buffer);
+        }
+
+        pub fn items(self: *const Self) []const T {
+            return self.buffer[0..self.size];
         }
 
         pub fn append(self: *Self, value: T) !void {
@@ -37,40 +43,45 @@ pub fn DynamicArray(comptime T: type) type {
             self.buffer[self.size] = value;
             self.size += 1;
         }
+
+        pub fn get(self: *const Self, index: usize) ?T {
+            if (index >= self.size) return null;
+            return self.buffer[index];
+        }
     };
 }
 
 // tests
-test "Dynamic array init creates an empty array with the length of the given capactiy" {
+test "Dynamic array init creates an empty array with the length of the given capacity" {
     const allocator = testing.allocator;
-    var new_dynamaic_array = try DynamicArray(i32).init(allocator, 10);
-    defer new_dynamaic_array.deinit();
+    var new_dynamic_array = try DynamicArray(i32).init(allocator, 10);
+    defer new_dynamic_array.deinit();
 
-    try testing.expect(new_dynamaic_array.size == 0);
-    try testing.expect(new_dynamaic_array.buffer.len == 10);
+    try testing.expect(new_dynamic_array.size == 0);
+    try testing.expect(new_dynamic_array.buffer.len == 10);
 }
 
 test "Append appends the given value at the end of the dynamic array" {
     const allocator = testing.allocator;
-    var new_dynamaic_array = try DynamicArray(u8).initDefault(allocator);
-    defer new_dynamaic_array.deinit();
+    var new_dynamic_array = try DynamicArray(u8).initDefault(allocator);
+    defer new_dynamic_array.deinit();
 
-    try new_dynamaic_array.append(32);
-    try new_dynamaic_array.append(64);
+    try new_dynamic_array.append(32);
+    try new_dynamic_array.append(64);
 
-    try testing.expectEqual(new_dynamaic_array.buffer[0], 32);
-    try testing.expectEqual(new_dynamaic_array.buffer[1], 64);
+    try testing.expectEqual(new_dynamic_array.buffer[0], 32);
+    try testing.expectEqual(new_dynamic_array.buffer[1], 64);
 }
 
-test "Append when the capacity is at it's limit will increase the capactiy of the inner array" {
+test "Append when the capacity is at it's limit will increase the capacity of the inner array" {
     const allocator = testing.allocator;
-    var new_dynamaic_array = try DynamicArray(i32).init(allocator, 2);
-    defer new_dynamaic_array.deinit();
+    var new_dynamic_array = try DynamicArray(i32).init(allocator, 2);
+    defer new_dynamic_array.deinit();
 
-    try new_dynamaic_array.append(128);
-    try new_dynamaic_array.append(256);
-    try new_dynamaic_array.append(512);
+    try new_dynamic_array.append(128);
+    try new_dynamic_array.append(256);
+    try new_dynamic_array.append(512);
 
-    try testing.expectEqual(4, new_dynamaic_array.buffer.len);
-    try testing.expectEqual(3, new_dynamaic_array.size);
+    try testing.expectEqual(4, new_dynamic_array.buffer.len);
+    try testing.expectEqual(3, new_dynamic_array.size);
 }

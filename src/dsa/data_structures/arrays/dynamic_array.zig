@@ -5,6 +5,9 @@ pub fn DynamicArray(comptime T: type) type {
     return struct {
         const Self = @This();
 
+        const SMALL_THRESHOLD = 4096; // 4KB - use 2x growth
+        const MEDIUM_THRESHOLD = 1048576; // 1MB - use 1.5x growth
+
         // Fields
         allocator: std.mem.Allocator,
         buffer: []T,
@@ -32,9 +35,18 @@ pub fn DynamicArray(comptime T: type) type {
             return self.buffer[0..self.size];
         }
 
+        pub fn getSize(self: *const Self) usize {
+            return self.size;
+        }
+
+        pub fn getCapacity(self: *const Self) usize {
+            return self.buffer.len;
+        }
+
         pub fn append(self: *Self, value: T) !void {
             if (self.size >= self.buffer.len) {
-                const new_array = try self.allocator.alloc(T, self.buffer.len * 2);
+                const new_capacity = self.calculateNewCapacity();
+                const new_array = try self.allocator.alloc(T, new_capacity);
                 @memcpy(new_array[0..self.size], self.buffer[0..self.size]);
                 self.allocator.free(self.buffer);
                 self.buffer = new_array;
@@ -42,6 +54,22 @@ pub fn DynamicArray(comptime T: type) type {
 
             self.buffer[self.size] = value;
             self.size += 1;
+        }
+
+        // helper function for append
+        fn calculateNewCapacity(self: *const Self) usize {
+            const current_bytes = self.buffer.len * @sizeOf(T);
+
+            if (current_bytes < SMALL_THRESHOLD) {
+                // Small arrays: double (2x)
+                return self.buffer.len * 2;
+            } else if (current_bytes < MEDIUM_THRESHOLD) {
+                // Medium arrays: 1.5x growth
+                return (self.buffer.len * 3) / 2;
+            } else {
+                // Large arrays: 1.25x growth
+                return (self.buffer.len * 5) / 4;
+            }
         }
 
         pub fn remove(self: *Self, index_to_remove: usize) bool {
@@ -57,9 +85,26 @@ pub fn DynamicArray(comptime T: type) type {
             return true;
         }
 
+        pub fn clearRetainingCapacity(self: *Self) void {
+            self.size = 0;
+        }
+
+        pub fn clearAndFree(self: *Self) void {
+            self.allocator.free(self.buffer);
+            try self.allocator.alloc(T, 1);
+            self.size = 0;
+        }
+
         pub fn get(self: *const Self, index: usize) ?T {
             if (index >= self.size) return null;
             return self.buffer[index];
+        }
+
+        pub fn pop(self: *Self) ?T {
+            if (self.size == 0) return null;
+
+            self.size -= 1;
+            return self.buffer[self.size];
         }
     };
 }

@@ -9,7 +9,7 @@ Practicing data structures and algorithms while getting comfortable with Zig syn
 ## Topics to Cover
 
 **Data Structures**
-- [ ] Arrays & Dynamic Arrays
+- [x] Arrays & Dynamic Arrays (still missing test and documentations)
 - [x] Linked Lists
 - [x] Ring Buffer
 - [ ] Stacks & Queues

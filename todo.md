@@ -1,7 +1,7 @@
 # Data Structures TODO
 
 ## Prerequisites (needed as underlying structures)
-- [ ] Dynamic Array
+- [x] Dynamic Array (still missing test and documentations)
 - [x] Ring Buffer
 
 ## Main Structures

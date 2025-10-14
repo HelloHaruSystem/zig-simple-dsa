@@ -1,18 +1,21 @@
 const std = @import("std");
 const testing = std.testing;
 
+/// Simple dynamic array
 pub fn DynamicArray(comptime T: type) type {
     return struct {
         const Self = @This();
 
+        // growth strategy
         const SMALL_THRESHOLD = 4096; // 4KB - use 2x growth
         const MEDIUM_THRESHOLD = 1048576; // 1MB - use 1.5x growth
 
-        // Fields
+        // fields
         allocator: std.mem.Allocator,
         buffer: []T,
         size: usize,
 
+        /// initialize empty dynamic array with given capacity
         pub fn init(allocator: std.mem.Allocator, capacity: usize) !Self {
             const cap = if (capacity == 0) 1 else capacity;
 

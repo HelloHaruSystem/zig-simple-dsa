@@ -90,7 +90,7 @@ test "RingBuffer init creates an empty ring buffer" {
     try testing.expect(ring_buffer.size == 0);
 }
 
-test "RingBuffer deinint cleans up memory" {
+test "RingBuffer deinit cleans up memory" {
     const allocator = testing.allocator;
     var buffer = try RingBuffer(i32).init(allocator, 128);
 
@@ -112,7 +112,7 @@ test "isEmpty returns true on empty buffer" {
     try testing.expect(buffer.isEmpty());
 }
 
-test "isEmpty returns fall on non empty" {
+test "isEmpty returns false on non empty" {
     const allocator = testing.allocator;
     var buffer = try RingBuffer(i16).init(allocator, 64);
     defer buffer.deinit();
@@ -163,7 +163,7 @@ test "push returns null if it doesn't overwrite existing data" {
     try testing.expectEqual(null, buffer.push(1024));
 }
 
-test "pop basic funtionality" {
+test "pop basic functionality" {
     const allocator = testing.allocator;
     var buffer = try RingBuffer(u16).init(allocator, 3);
     defer buffer.deinit();

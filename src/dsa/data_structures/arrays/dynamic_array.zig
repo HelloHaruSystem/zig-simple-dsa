@@ -218,7 +218,7 @@ test "remove decreases size and keeps the right order" {
     _ = d_array.remove(2);
     const d_array_items = d_array.items();
 
-    try testing.expectEqual(@as(i32, 4), d_array.getSize());
+    try testing.expectEqual(@as(usize, 4), d_array.getSize());
     for (0..d_array.getSize()) |i| {
         try testing.expectEqual(@as(i32, @intCast(i)), d_array_items[i]);
     }

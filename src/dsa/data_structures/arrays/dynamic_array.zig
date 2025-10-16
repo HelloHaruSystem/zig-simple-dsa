@@ -203,3 +203,23 @@ test "calculateNewCapacity will multiple the capacity by 1.25 the capacity of la
     try testing.expectEqual(@as(usize, 131072), d_array.getCapacity());
     try testing.expectEqual(@as(usize, 163840), d_array.calculateNewCapacity());
 }
+
+test "remove decreases size and keeps the right order" {
+    const allocator = testing.allocator;
+    var d_array = try DynamicArray(i32).init(allocator, 32);
+    defer d_array.deinit();
+
+    try d_array.append(0);
+    try d_array.append(1);
+    try d_array.append(4);
+    try d_array.append(2);
+    try d_array.append(3);
+
+    _ = d_array.remove(2);
+    const d_array_items = d_array.items();
+
+    try testing.expectEqual(@as(i32, 4), d_array.getSize());
+    for (0..d_array.getSize()) |i| {
+        try testing.expectEqual(@as(i32, @intCast(i)), d_array_items[i]);
+    }
+}

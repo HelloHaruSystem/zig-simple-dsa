@@ -152,7 +152,7 @@ test "Dynamic array init creates an empty array with the length of the given cap
     try testing.expect(new_dynamic_array.buffer.len == 10);
 }
 
-test "Append appends the given value at the en(self.buffer.len * 3) / 2;d of the dynamic array" {
+test "Append appends the given value at the end of the dynamic array" {
     const allocator = testing.allocator;
     var new_dynamic_array = try DynamicArray(u8).initDefault(allocator);
     defer new_dynamic_array.deinit();
@@ -270,7 +270,7 @@ test "clearRetainingCapacity Will set size to zero but keep the capacity" {
     try testing.expectEqual(@as(usize, prev_capacity), d_array.getCapacity());
 }
 
-test "clearAndFree will set the size to zero and set the capacity to the deufalt size of 16" {
+test "clearAndFree will set the size to zero and set the capacity to the default size of 16" {
     const allocator = testing.allocator;
     var d_array = try DynamicArray(i32).init(allocator, 1024);
     defer d_array.deinit();
@@ -325,4 +325,26 @@ test "get returns null if index is out of bounds" {
     const return_value = d_array.get(3);
 
     try testing.expect(return_value == null);
+}
+
+test "pop basic functionality" {
+    const allocator = testing.allocator;
+    var d_array = try DynamicArray(i32).init(allocator, 1024);
+    defer d_array.deinit();
+
+    try d_array.append(0);
+    try d_array.append(1);
+    try d_array.append(4);
+
+    try testing.expectEqual(@as(i32, 4), d_array.pop().?);
+    try testing.expectEqual(@as(i32, 1), d_array.pop().?);
+    try testing.expectEqual(@as(i32, 0), d_array.pop().?);
+}
+
+test "pop returns null in case of empty array" {
+    const allocator = testing.allocator;
+    var d_array = try DynamicArray(u8).init(allocator, 32);
+    defer d_array.deinit();
+
+    try testing.expect(d_array.pop() == null);
 }

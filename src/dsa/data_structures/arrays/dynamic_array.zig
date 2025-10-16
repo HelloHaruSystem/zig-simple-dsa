@@ -286,3 +286,43 @@ test "clearAndFree will set the size to zero and set the capacity to the deufalt
     try testing.expectEqual(@as(usize, 0), d_array.getSize());
     try testing.expectEqual(@as(usize, 16), d_array.getCapacity());
 }
+
+test "get basic functionality" {
+    const allocator = testing.allocator;
+    var d_array = try DynamicArray(i32).init(allocator, 1024);
+    defer d_array.deinit();
+
+    try d_array.append(0);
+    try d_array.append(1);
+    try d_array.append(4);
+    const return_value = d_array.get(2);
+
+    try testing.expectEqual(?*const i32, @TypeOf(return_value));
+}
+
+test "get null and dereference check" {
+    const allocator = testing.allocator;
+    var d_array = try DynamicArray(i32).init(allocator, 1024);
+    defer d_array.deinit();
+
+    try d_array.append(0);
+    try d_array.append(1);
+    try d_array.append(4);
+    const return_value = d_array.get(2);
+
+    try testing.expect(return_value != null);
+    try testing.expectEqual(@as(i32, 4), return_value.?.*);
+}
+
+test "get returns null if index is out of bounds" {
+    const allocator = testing.allocator;
+    var d_array = try DynamicArray(i32).init(allocator, 1024);
+    defer d_array.deinit();
+
+    try d_array.append(0);
+    try d_array.append(1);
+    try d_array.append(4);
+    const return_value = d_array.get(3);
+
+    try testing.expect(return_value == null);
+}

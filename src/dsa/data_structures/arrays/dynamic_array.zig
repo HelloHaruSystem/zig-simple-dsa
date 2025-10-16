@@ -223,3 +223,66 @@ test "remove decreases size and keeps the right order" {
         try testing.expectEqual(@as(i32, @intCast(i)), d_array_items[i]);
     }
 }
+
+test "remove on empty array will return false" {
+    const allocator = testing.allocator;
+    var d_array = try DynamicArray(i32).init(allocator, 32);
+    defer d_array.deinit();
+
+    try testing.expect(!d_array.remove(0));
+}
+
+test "remove when removing an item will return true" {
+    const allocator = testing.allocator;
+    var d_array = try DynamicArray(i32).init(allocator, 32);
+    defer d_array.deinit();
+
+    try d_array.append(64);
+
+    try testing.expect(d_array.remove(0));
+}
+
+test "remove on out of bounds index will return false" {
+    const allocator = testing.allocator;
+    var d_array = try DynamicArray(i32).init(allocator, 32);
+    defer d_array.deinit();
+
+    try d_array.append(64);
+
+    try testing.expect(!d_array.remove(1));
+}
+
+test "clearRetainingCapacity Will set size to zero but keep the capacity" {
+    const allocator = testing.allocator;
+    var d_array = try DynamicArray(i32).init(allocator, 1024);
+    defer d_array.deinit();
+
+    try d_array.append(0);
+    try d_array.append(1);
+    try d_array.append(4);
+    try d_array.append(2);
+    try d_array.append(3);
+    const prev_capacity = d_array.getCapacity();
+
+    d_array.clearRetainingCapacity();
+
+    try testing.expectEqual(@as(usize, 0), d_array.getSize());
+    try testing.expectEqual(@as(usize, prev_capacity), d_array.getCapacity());
+}
+
+test "clearAndFree will set the size to zero and set the capacity to the deufalt size of 16" {
+    const allocator = testing.allocator;
+    var d_array = try DynamicArray(i32).init(allocator, 1024);
+    defer d_array.deinit();
+
+    try d_array.append(0);
+    try d_array.append(1);
+    try d_array.append(4);
+    try d_array.append(2);
+    try d_array.append(3);
+
+    try d_array.clearAndFree();
+
+    try testing.expectEqual(@as(usize, 0), d_array.getSize());
+    try testing.expectEqual(@as(usize, 16), d_array.getCapacity());
+}

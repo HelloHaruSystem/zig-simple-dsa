@@ -164,7 +164,7 @@ test "Append appends the given value at the en(self.buffer.len * 3) / 2;d of the
     try testing.expectEqual(new_dynamic_array.buffer[1], 64);
 }
 
-test "Append when the capacity is at it's limit will increase the capacity of the inner array" {
+test "Append when the capacity is at it's limit will increase the capacity of the inner buffer" {
     const allocator = testing.allocator;
     var new_dynamic_array = try DynamicArray(i32).init(allocator, 2);
     defer new_dynamic_array.deinit();
@@ -175,4 +175,31 @@ test "Append when the capacity is at it's limit will increase the capacity of th
 
     try testing.expectEqual(4, new_dynamic_array.buffer.len);
     try testing.expectEqual(3, new_dynamic_array.size);
+}
+
+test "calculateNewCapacity will double the capacity of small arrays" {
+    const allocator = testing.allocator;
+    var d_array = try DynamicArray(u8).init(allocator, 2);
+    defer d_array.deinit();
+
+    try testing.expectEqual(@as(usize, 2), d_array.getCapacity());
+    try testing.expectEqual(@as(usize, 4), d_array.calculateNewCapacity());
+}
+
+test "calculateNewCapacity will multiple the capacity by 1.5 the capacity of medium arrays" {
+    const allocator = testing.allocator;
+    var d_array = try DynamicArray(i32).init(allocator, 1024);
+    defer d_array.deinit();
+
+    try testing.expectEqual(@as(usize, 1024), d_array.getCapacity());
+    try testing.expectEqual(@as(usize, 1536), d_array.calculateNewCapacity());
+}
+
+test "calculateNewCapacity will multiple the capacity by 1.25 the capacity of large arrays" {
+    const allocator = testing.allocator;
+    var d_array = try DynamicArray(f64).init(allocator, 131072);
+    defer d_array.deinit();
+
+    try testing.expectEqual(@as(usize, 131072), d_array.getCapacity());
+    try testing.expectEqual(@as(usize, 163840), d_array.calculateNewCapacity());
 }

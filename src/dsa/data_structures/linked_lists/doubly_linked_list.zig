@@ -587,7 +587,7 @@ test "basic reverse functionality" {
     try testing.expect(list.head == null);
 }
 
-test "append basic funtionality" {
+test "append basic functionality" {
     const allocator = testing.allocator;
     var list = DoublyLinkedList(u8).init(allocator);
     defer list.deinit();

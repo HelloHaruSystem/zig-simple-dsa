@@ -46,7 +46,7 @@ pub const Searching = struct {
     }
 };
 
-test "binary search basic funtionality" {
+test "binary search basic functionality" {
     const sorted_array = [_]i32{ 11, 12, 22, 25, 34, 64, 90 };
     const target_number = 64;
     const expected_index: usize = 5;

@@ -152,7 +152,7 @@ test "Dynamic array init creates an empty array with the length of the given cap
     try testing.expect(new_dynamic_array.buffer.len == 10);
 }
 
-test "Append appends the given value at the en(self.buffer.len * 3) / 2;d of the dynamic array" {
+test "Append appends the given value at the end of the dynamic array" {
     const allocator = testing.allocator;
     var new_dynamic_array = try DynamicArray(u8).initDefault(allocator);
     defer new_dynamic_array.deinit();
@@ -164,7 +164,7 @@ test "Append appends the given value at the en(self.buffer.len * 3) / 2;d of the
     try testing.expectEqual(new_dynamic_array.buffer[1], 64);
 }
 
-test "Append when the capacity is at it's limit will increase the capacity of the inner array" {
+test "Append when the capacity is at it's limit will increase the capacity of the inner buffer" {
     const allocator = testing.allocator;
     var new_dynamic_array = try DynamicArray(i32).init(allocator, 2);
     defer new_dynamic_array.deinit();
@@ -175,4 +175,176 @@ test "Append when the capacity is at it's limit will increase the capacity of th
 
     try testing.expectEqual(4, new_dynamic_array.buffer.len);
     try testing.expectEqual(3, new_dynamic_array.size);
+}
+
+test "calculateNewCapacity will double the capacity of small arrays" {
+    const allocator = testing.allocator;
+    var d_array = try DynamicArray(u8).init(allocator, 2);
+    defer d_array.deinit();
+
+    try testing.expectEqual(@as(usize, 2), d_array.getCapacity());
+    try testing.expectEqual(@as(usize, 4), d_array.calculateNewCapacity());
+}
+
+test "calculateNewCapacity will multiple the capacity by 1.5 the capacity of medium arrays" {
+    const allocator = testing.allocator;
+    var d_array = try DynamicArray(i32).init(allocator, 1024);
+    defer d_array.deinit();
+
+    try testing.expectEqual(@as(usize, 1024), d_array.getCapacity());
+    try testing.expectEqual(@as(usize, 1536), d_array.calculateNewCapacity());
+}
+
+test "calculateNewCapacity will multiple the capacity by 1.25 the capacity of large arrays" {
+    const allocator = testing.allocator;
+    var d_array = try DynamicArray(f64).init(allocator, 131072);
+    defer d_array.deinit();
+
+    try testing.expectEqual(@as(usize, 131072), d_array.getCapacity());
+    try testing.expectEqual(@as(usize, 163840), d_array.calculateNewCapacity());
+}
+
+test "remove decreases size and keeps the right order" {
+    const allocator = testing.allocator;
+    var d_array = try DynamicArray(i32).init(allocator, 32);
+    defer d_array.deinit();
+
+    try d_array.append(0);
+    try d_array.append(1);
+    try d_array.append(4);
+    try d_array.append(2);
+    try d_array.append(3);
+
+    _ = d_array.remove(2);
+    const d_array_items = d_array.items();
+
+    try testing.expectEqual(@as(usize, 4), d_array.getSize());
+    for (0..d_array.getSize()) |i| {
+        try testing.expectEqual(@as(i32, @intCast(i)), d_array_items[i]);
+    }
+}
+
+test "remove on empty array will return false" {
+    const allocator = testing.allocator;
+    var d_array = try DynamicArray(i32).init(allocator, 32);
+    defer d_array.deinit();
+
+    try testing.expect(!d_array.remove(0));
+}
+
+test "remove when removing an item will return true" {
+    const allocator = testing.allocator;
+    var d_array = try DynamicArray(i32).init(allocator, 32);
+    defer d_array.deinit();
+
+    try d_array.append(64);
+
+    try testing.expect(d_array.remove(0));
+}
+
+test "remove on out of bounds index will return false" {
+    const allocator = testing.allocator;
+    var d_array = try DynamicArray(i32).init(allocator, 32);
+    defer d_array.deinit();
+
+    try d_array.append(64);
+
+    try testing.expect(!d_array.remove(1));
+}
+
+test "clearRetainingCapacity Will set size to zero but keep the capacity" {
+    const allocator = testing.allocator;
+    var d_array = try DynamicArray(i32).init(allocator, 1024);
+    defer d_array.deinit();
+
+    try d_array.append(0);
+    try d_array.append(1);
+    try d_array.append(4);
+    try d_array.append(2);
+    try d_array.append(3);
+    const prev_capacity = d_array.getCapacity();
+
+    d_array.clearRetainingCapacity();
+
+    try testing.expectEqual(@as(usize, 0), d_array.getSize());
+    try testing.expectEqual(@as(usize, prev_capacity), d_array.getCapacity());
+}
+
+test "clearAndFree will set the size to zero and set the capacity to the default size of 16" {
+    const allocator = testing.allocator;
+    var d_array = try DynamicArray(i32).init(allocator, 1024);
+    defer d_array.deinit();
+
+    try d_array.append(0);
+    try d_array.append(1);
+    try d_array.append(4);
+    try d_array.append(2);
+    try d_array.append(3);
+
+    try d_array.clearAndFree();
+
+    try testing.expectEqual(@as(usize, 0), d_array.getSize());
+    try testing.expectEqual(@as(usize, 16), d_array.getCapacity());
+}
+
+test "get basic functionality" {
+    const allocator = testing.allocator;
+    var d_array = try DynamicArray(i32).init(allocator, 1024);
+    defer d_array.deinit();
+
+    try d_array.append(0);
+    try d_array.append(1);
+    try d_array.append(4);
+    const return_value = d_array.get(2);
+
+    try testing.expectEqual(?*const i32, @TypeOf(return_value));
+}
+
+test "get null and dereference check" {
+    const allocator = testing.allocator;
+    var d_array = try DynamicArray(i32).init(allocator, 1024);
+    defer d_array.deinit();
+
+    try d_array.append(0);
+    try d_array.append(1);
+    try d_array.append(4);
+    const return_value = d_array.get(2);
+
+    try testing.expect(return_value != null);
+    try testing.expectEqual(@as(i32, 4), return_value.?.*);
+}
+
+test "get returns null if index is out of bounds" {
+    const allocator = testing.allocator;
+    var d_array = try DynamicArray(i32).init(allocator, 1024);
+    defer d_array.deinit();
+
+    try d_array.append(0);
+    try d_array.append(1);
+    try d_array.append(4);
+    const return_value = d_array.get(3);
+
+    try testing.expect(return_value == null);
+}
+
+test "pop basic functionality" {
+    const allocator = testing.allocator;
+    var d_array = try DynamicArray(i32).init(allocator, 1024);
+    defer d_array.deinit();
+
+    try d_array.append(0);
+    try d_array.append(1);
+    try d_array.append(4);
+
+    try testing.expectEqual(@as(i32, 4), d_array.pop().?);
+    try testing.expectEqual(@as(i32, 1), d_array.pop().?);
+    try testing.expectEqual(@as(i32, 0), d_array.pop().?);
+}
+
+test "pop returns null in case of empty array" {
+    const allocator = testing.allocator;
+    var d_array = try DynamicArray(u8).init(allocator, 32);
+    defer d_array.deinit();
+
+    try testing.expect(d_array.pop() == null);
 }

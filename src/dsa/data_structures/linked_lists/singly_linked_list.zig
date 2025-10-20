@@ -895,7 +895,7 @@ test "popTail basic functionality" {
     try testing.expect(list.isEmpty());
 }
 
-test "concat basic funcionality" {
+test "concat basic functionality" {
     const allocator = testing.allocator;
     var list1 = SinglyLinkedList(i32).init(allocator);
     var list2 = SinglyLinkedList(i32).init(allocator);

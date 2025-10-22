@@ -6,6 +6,7 @@ pub fn Queue(comptime T: type) type {
         const Self = @This();
 
         // fields
+        // TODO: add doc comments explainging the memory ownership model and why we leave it to the underlying data structure
         _doubly_linked_list: list.DoublyLinkedList(T),
 
         //TODO: init and initdefault function
@@ -19,6 +20,26 @@ pub fn Queue(comptime T: type) type {
         /// frees the memory used by the queue
         pub fn deinit(self: *Self) void {
             self._doubly_linked_list.deinit();
+        }
+
+        pub fn enqueue(self: *Self, value: T) !void {
+            try self._doubly_linked_list.append(value);
+        }
+
+        pub fn dequeue(self: *Self) ?T {
+            return self._doubly_linked_list.popHead();
+        }
+
+        pub fn peek(self: *const Self) ?T {
+            return self._doubly_linked_list.peekHead();
+        }
+
+        pub fn getSize(self: *const Self) usize {
+            return self._doubly_linked_list.getSize();
+        }
+
+        pub fn isEmpty(self: *const Self) bool {
+            return self.getSize() == 0;
         }
     };
 }

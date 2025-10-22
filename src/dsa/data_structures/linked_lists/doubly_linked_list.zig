@@ -33,7 +33,7 @@ pub fn DoublyLinkedList(comptime T: type) type {
         }
 
         /// Get the size of the list
-        pub fn getSize(self: *Self) usize {
+        pub fn getSize(self: *const Self) usize {
             return self.size;
         }
 

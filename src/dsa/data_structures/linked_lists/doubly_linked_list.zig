@@ -73,7 +73,7 @@ pub fn DoublyLinkedList(comptime T: type) type {
 
         /// Look at the first element without removing it
         /// Returns null if the list is empty
-        pub fn peekHead(self: *Self) ?T {
+        pub fn peekHead(self: *const Self) ?T {
             if (self.head) |head| {
                 return head.value;
             }

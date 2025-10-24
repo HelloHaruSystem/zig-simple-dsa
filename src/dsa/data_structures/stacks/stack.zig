@@ -110,3 +110,24 @@ test "pop returns null on empty stack" {
 
     try testing.expectEqual(null, stack.pop());
 }
+
+test "peek returns the value last inserted without removing it from the stack" {
+    const allocator = testing.allocator;
+    var stack = try Stack(i64).init(allocator);
+    defer stack.deinit();
+
+    try stack.push(63120);
+    try stack.push(4);
+
+    try testing.expectEqual(@as(i64, 4), stack.peek().?);
+    try testing.expectEqual(@as(i64, 4), stack.pop().?);
+    try testing.expectEqual(@as(i64, 63120), stack.peek().?);
+}
+
+test "peek returns null on an empty stack" {
+    const allocator = testing.allocator;
+    var stack = try Stack(u64).init(allocator);
+    defer stack.deinit();
+
+    try testing.expectEqual(null, stack.peek());
+}

@@ -131,3 +131,29 @@ test "peek returns null on an empty stack" {
 
     try testing.expectEqual(null, stack.peek());
 }
+
+test "getSize returns the correct size as a usize" {
+    const allocator = testing.allocator;
+    var stack = try Stack(u8).init(allocator);
+    defer stack.deinit();
+
+    try stack.push(127);
+    try stack.push(1);
+    try stack.push(72);
+    _ = stack.pop();
+    _ = stack.pop();
+
+    try testing.expect(stack.getSize() == 1);
+}
+
+test "isEmpty basic functionality" {
+    const allocator = testing.allocator;
+    var stack = try Stack(i16).init(allocator);
+    defer stack.deinit();
+
+    try stack.push(-128);
+
+    try testing.expect(!stack.isEmpty());
+    try testing.expectEqual(@as(i16, -128), stack.pop().?);
+    try testing.expect(stack.isEmpty());
+}

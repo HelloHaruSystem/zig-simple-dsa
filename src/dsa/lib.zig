@@ -11,6 +11,8 @@ const singly_linked_list_module = @import("./data_structures/linked_lists/singly
 const doubly_linked_list_module = @import("./data_structures/linked_lists/doubly_linked_list.zig");
 // queue
 const queue_module = @import("./data_structures/queues/queue.zig");
+// stack
+const stack_module = @import("./data_structures/stacks/stack.zig");
 
 // Ensure tests are included in compilation
 comptime {
@@ -27,6 +29,8 @@ comptime {
     _ = doubly_linked_list_module;
     // queue
     _ = queue_module;
+    // stack
+    _ = stack_module;
 }
 
 // add data structures here
@@ -40,6 +44,8 @@ pub const DataStructures = struct {
     pub const doubly_linked_list = doubly_linked_list_module.DoublyLinkedList;
     // queue
     pub const queue = queue_module.Queue;
+    // stack
+    pub const stack = stack_module.Stack;
 };
 
 // add algorithms here

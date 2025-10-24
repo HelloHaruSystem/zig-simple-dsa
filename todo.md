@@ -5,7 +5,7 @@
 - [x] Ring Buffer
 
 ## Main Structures
-- [x] Stack (using dynamic array) (needs doc comments)
+- [x] Stack (using dynamic array)
 - [x] Queue (doubly linked list)
 - [ ] Hash Map (dynamic array of pointers to linked list heads)
 - [ ] Deque (using doubly linked list)

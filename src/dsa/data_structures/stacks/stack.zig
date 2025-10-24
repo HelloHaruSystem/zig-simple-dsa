@@ -19,9 +19,24 @@ pub fn Stack(comptime T: type) type {
             self._dynamic_array.deinit();
         }
 
-        // TODO: push, pop, peek, getSize, isEmpty tests and docs
         pub fn push(self: *Self, value: T) !void {
             try self._dynamic_array.append(value);
+        }
+
+        pub fn pop(self: *Self) ?T {
+            return self._dynamic_array.pop();
+        }
+
+        pub fn peek(self: *const Self) ?T {
+            if (self.isEmpty()) return null;
+
+            const value = self._dynamic_array.get(self.getSize() - 1);
+
+            if (value) |non_null_value| {
+                return non_null_value.*;
+            }
+
+            return null;
         }
 
         pub fn getSize(self: *const Self) usize {
@@ -53,4 +68,18 @@ test "stack deinit function cleans up memory proberly" {
 
     stack.deinit();
     // If there is a memory leak the testing allocator will fail this test
+}
+
+test "push basic functionality" {
+    const allocator = testing.allocator;
+    var stack = try Stack(i16).init(allocator);
+    defer stack.deinit();
+
+    try stack.push(128);
+    try stack.push(256);
+
+    try testing.expect(!stack.isEmpty());
+    try testing.expect(stack.getSize() == 2);
+    try testing.expectEqual(@as(i16, 256), stack.peek().?);
+    try testing.expectEqual(@as(i16, 256), stack.pop().?);
 }

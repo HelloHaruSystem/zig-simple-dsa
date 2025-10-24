@@ -82,4 +82,31 @@ test "push basic functionality" {
     try testing.expect(stack.getSize() == 2);
     try testing.expectEqual(@as(i16, 256), stack.peek().?);
     try testing.expectEqual(@as(i16, 256), stack.pop().?);
+    try testing.expectEqual(@as(i16, 128), stack.pop().?);
+    try testing.expect(stack.isEmpty());
+    try testing.expect(stack.getSize() == 0);
+}
+
+test "pop basic functionality" {
+    const allocator = testing.allocator;
+    var stack = try Stack(f64).init(allocator);
+    defer stack.deinit();
+
+    try stack.push(53291.1234);
+    try stack.push(-1235.2341);
+
+    try testing.expect(stack.getSize() == 2);
+    try testing.expectEqual(@as(f64, -1235.2341), stack.pop().?);
+    try testing.expect(stack.getSize() == 1);
+    try testing.expectEqual(@as(f64, 53291.1234), stack.pop().?);
+    try testing.expect(stack.getSize() == 0);
+    try testing.expect(stack.isEmpty());
+}
+
+test "pop returns null on empty stack" {
+    const allocator = testing.allocator;
+    var stack = try Stack(u16).init(allocator);
+    defer stack.deinit();
+
+    try testing.expectEqual(null, stack.pop());
 }

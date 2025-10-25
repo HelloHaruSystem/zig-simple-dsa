@@ -10,7 +10,7 @@ pub fn main() !void {
     var stdout_writer = std.fs.File.stdout().writer(&stdout_buffer);
     const stdout = &stdout_writer.interface;
 
-    var list = dsa.DataStructures.singly_linked_list(u8).init(allocator);
+    var list = dsa.lists.SinglyLinkedList(u8).init(allocator);
     defer list.deinit();
 
     try list.prepend(2);

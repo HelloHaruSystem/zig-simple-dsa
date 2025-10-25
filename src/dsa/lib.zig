@@ -1,7 +1,7 @@
 const std = @import("std");
 
 // algorithims
-pub const alogorithms = @import("algorithms/mod.zig");
+pub const algorithms = @import("algorithms/mod.zig");
 
 // data structures
 pub const arrays = @import("data_structures/arrays/mod.zig");

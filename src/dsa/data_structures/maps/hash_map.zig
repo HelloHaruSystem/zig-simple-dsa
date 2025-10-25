@@ -132,6 +132,7 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
         }
 
         // TODO: get(), remove(key), contains(key) maybe an iterator to iterate over keys and values
+        // TODO: TEST TEST TEST :)
 
         // a entry for the bucket containing a key and value pair
         const Entry = struct {

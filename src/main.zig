@@ -31,3 +31,19 @@ pub fn main() !void {
     // Don't forget to flush
     try stdout.flush();
 }
+
+//
+//const std = @import("std");
+//
+//pub fn HashMap(comptime K: type, comptime V: type) type {
+//    return struct {
+//        // ... your fields
+//
+//        fn hash(key: K) u64 {
+//            var hasher = std.hash.Wyhash.init(0);
+//            std.hash.autoHash(&hasher, key);
+//            return hasher.final();
+//        }
+//    };
+//}
+//

@@ -7,7 +7,7 @@
 ## Main Structures
 - [x] Stack (using dynamic array)
 - [x] Queue (doubly linked list)
-- [ ] Hash Map (array of pointers to linked list heads)
+- [ ] Hash Map (array of linked list)
 - [ ] Deque (using doubly linked list)
 
 ## Potential improvements

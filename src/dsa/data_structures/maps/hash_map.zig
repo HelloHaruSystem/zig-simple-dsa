@@ -14,7 +14,7 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
         /// The buckets holding the entries of the hash map
         /// This is a singly linked list that can hold multiple entries in case of a collision
         buckets: []LinkedList(Entry),
-        /// Capactiy of the hash map
+        /// Capacity of the hash map
         /// Defaults to 16 but expands when the number of entries / capacity exceeds 0.75
         capacity: usize,
         /// The number of entries into the hash map
@@ -141,6 +141,9 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
             self.capacity = new_capacity;
         }
 
+        /// Inserts a key, value pair into the hash map
+        /// This method will overwrite previous value if the same key is given
+        /// This will also expand the capacity and rehash the current inserted values if needed
         pub fn put(self: *Self, key: key_type, value: value_type) !void {
             const hashed_key = hash(key);
             const index = self.getIndex(hashed_key);
@@ -169,6 +172,8 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
             }
         }
 
+        /// Takes a key as argument and finds the value matching for that key in the hashmap
+        /// If no matching key is found in the hash map then this method will return null
         pub fn get(self: *const Self, key: key_type) ?value_type {
             if (self.count == 0) return null;
 
@@ -190,7 +195,7 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
             return null;
         }
 
-        // TODO: get(), remove(key), contains(key) maybe an iterator to iterate over keys and values
+        // TODO: remove(key), contains(key) maybe an iterator to iterate over keys and values
         // TODO: TEST TEST TEST :)
 
         /// Internal struct used to hold the key, value pair used in the hashmap
@@ -319,4 +324,43 @@ test "put method with same key overwrites without inserting a new entry" {
     try testing.expectEqual("Farvel med dig", hash_map.get(1));
     try testing.expectEqual("Hej med dig", hash_map.get(2));
     try testing.expect(counter == 2);
+}
+
+test "get method basic functionality" {
+    const allocator = testing.allocator;
+    var hash_map = try HashMap(u8, []const u8).init(allocator);
+    defer hash_map.deinit();
+
+    try hash_map.put('w', "up");
+    try hash_map.put('s', "down");
+    try hash_map.put('a', "left");
+    try hash_map.put('d', "right");
+
+    try testing.expectEqual("up", hash_map.get('w'));
+    try testing.expectEqual("down", hash_map.get('s'));
+    try testing.expectEqual("left", hash_map.get('a'));
+    try testing.expectEqual("right", hash_map.get('d'));
+}
+
+test "get method returns null when key is not present in the hash map" {
+    const allocator = testing.allocator;
+    var hash_map = try HashMap(u16, i32).init(allocator);
+    defer hash_map.deinit();
+
+    try hash_map.put(2, 4);
+    try hash_map.put(4, 16);
+    try hash_map.put(16, 256);
+
+    try testing.expectEqual(4, hash_map.get(2));
+    try testing.expectEqual(16, hash_map.get(4));
+    try testing.expectEqual(256, hash_map.get(16));
+    try testing.expectEqual(null, hash_map.get(256));
+}
+
+test "get returns null on hash map with a count of 0" {
+    const allocator = testing.allocator;
+    var hash_map = try HashMap(u8, i8).init(allocator);
+    defer hash_map.deinit();
+
+    try testing.expectEqual(null, hash_map.get(1));
 }

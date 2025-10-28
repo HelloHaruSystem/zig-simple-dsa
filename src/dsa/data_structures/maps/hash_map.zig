@@ -205,7 +205,7 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
             const index = self.getIndex(hashed_key);
             var bucket = &self.buckets[index];
 
-            // if the key to remove is the head of the linked list
+            // If the key to remove is the head of the linked list
             if (bucket.head) |head| {
                 if (keysEqual(head.data.key, key)) {
                     const value = bucket.popHead().?.value;
@@ -214,7 +214,7 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
                 }
             }
 
-            // otherwise
+            // Otherwise
             var current = bucket.head;
             while (current) |node| {
                 if (node.next) |next_node| {
@@ -233,8 +233,27 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
             return null;
         }
 
-        // TODO: remove(key), contains(key) maybe an iterator to iterate over keys and values
-        // TODO: TEST TEST TEST :)
+        /// Returns true if the hash map contains the given key
+        /// Otherwise false
+        pub fn contains(self: *Self, key: key_type) bool {
+            if (self.count == 0) return false;
+
+            const hashed_key = hash(key);
+            const index = self.getIndex(hashed_key);
+            var current = self.buckets[index].head;
+
+            while (current) |node| {
+                if (keysEqual(node.data.key, key)) {
+                    return true;
+                }
+
+                current = node.next;
+            }
+
+            return false;
+        }
+
+        // TODO: Maybe an iterator to iterate over keys and values?
 
         /// Internal struct used to hold the key, value pair used in the hashmap
         /// It's generic both for key and value and the Wyhash should be able to hash
@@ -413,13 +432,15 @@ test "remove method basic functionality" {
     try hash_map.put(128, 256);
 
     try testing.expect(hash_map.count == 3);
-    try testing.expectEqual(64, hash_map.remove(32));
+    try testing.expectEqual(64, hash_map.remove(32).?);
     try testing.expect(hash_map.count == 2);
-    try testing.expectEqual(128, hash_map.remove(64));
+    try testing.expect(!hash_map.contains(32));
+    try testing.expectEqual(128, hash_map.remove(64).?);
     try testing.expect(hash_map.count == 1);
-    try testing.expectEqual(256, hash_map.remove(128));
+    try testing.expect(!hash_map.contains(64));
+    try testing.expectEqual(256, hash_map.remove(128).?);
     try testing.expect(hash_map.count == 0);
-    // TODO: use contains when implemented to check if the values are gone
+    try testing.expect(!hash_map.contains(128));
 }
 
 test "remove returns null when key isn't found in the hash map" {
@@ -430,10 +451,11 @@ test "remove returns null when key isn't found in the hash map" {
     try hash_map.put('a', 'A');
     try hash_map.put('b', 'B');
 
-    try testing.expectEqual('A', hash_map.remove('a'));
-    try testing.expectEqual('B', hash_map.remove('b'));
+    try testing.expectEqual('A', hash_map.remove('a').?);
+    try testing.expectEqual('B', hash_map.remove('b').?);
     try testing.expectEqual(null, hash_map.remove('c'));
-    // TODO: use contains when implemented to check if the values are gone
+    try testing.expect(!hash_map.contains('a'));
+    try testing.expect(!hash_map.contains('b'));
 }
 
 test "remove returns null called on an empty hash map" {
@@ -443,4 +465,32 @@ test "remove returns null called on an empty hash map" {
 
     try testing.expectEqual(null, hash_map.remove('x'));
     try testing.expect(hash_map.count == 0);
+}
+
+test "Calling get method after remove returns null" {
+    const allocator = testing.allocator;
+    var hash_map = try HashMap(u8, []const u8).init(allocator);
+    defer hash_map.deinit();
+
+    try hash_map.put('s', "Smile");
+    _ = hash_map.remove('s');
+
+    try testing.expectEqual(null, hash_map.get('s'));
+    try testing.expect(!hash_map.contains('s'));
+}
+
+test "contains method basic functionality" {
+    const allocator = testing.allocator;
+    var hash_map = try HashMap([]const u8, []const u8).init(allocator);
+    defer hash_map.deinit();
+
+    try hash_map.put("red", "#FF0000");
+    try hash_map.put("blue", "#0000FF");
+
+    try testing.expect(hash_map.contains("red"));
+    try testing.expectEqual("#FF0000", hash_map.remove("red").?);
+    try testing.expect(!hash_map.contains("red"));
+    try testing.expect(hash_map.contains("blue"));
+    try testing.expectEqual("#0000FF", hash_map.remove("blue").?);
+    try testing.expect(!hash_map.contains("blue"));
 }

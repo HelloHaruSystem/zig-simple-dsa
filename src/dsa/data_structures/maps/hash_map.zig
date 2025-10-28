@@ -1,5 +1,6 @@
 const std = @import("std");
 const LinkedList = @import("../linked_lists/singly_linked_list.zig").SinglyLinkedList;
+const testing = std.testing;
 
 /// A simple implementation of a hash map.
 /// default capacity is 16 and it uses std.Wyhash for hashing
@@ -48,6 +49,12 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
         /// Internal hash function
         /// Using std.Wyhash to hash the keys
         fn hash(key: key_type) u64 {
+            // check type info to see if the input is a slice
+            const type_info = @typeInfo(key_type);
+
+            if (type_info == .pointer and type_info.pointer.size == .slice) {
+                return hashSlice(key);
+            }
             // using 0 as seed (mostly to make testing easier)
             // consider using std.crypto.random.int(u64) in the future
             var hasher = std.hash.Wyhash.init(0);
@@ -56,9 +63,23 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
             return hasher.final();
         }
 
+        /// Inter hash function similiar to the regular hash function
+        /// But used to hash strings(slices)
+        fn hashSlice(key: key_type) u64 {
+            return std.hash.Wyhash.hash(0, key);
+        }
+
         /// Internal function that checks for equal keys
         /// using std.meta.eql()
+        /// in case of slices it will use std.mem.eql to compare byte-to-byte
         fn keysEqual(key_a: key_type, key_b: key_type) bool {
+            const type_info = @typeInfo(key_type);
+
+            if (type_info == .pointer and type_info.pointer.size == .slice) {
+                const child_type = type_info.pointer.child;
+                return std.mem.eql(child_type, key_a, key_b);
+            }
+
             return std.meta.eql(key_a, key_b);
         }
 
@@ -155,4 +176,39 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
             value: value_type,
         };
     };
+}
+
+// tests
+test "Hash map init() creates an empty hash map with a capacity of 16, count as 0" {
+    const allocator = testing.allocator;
+    var hash_map = try HashMap([]const u8, i32).init(allocator);
+    defer hash_map.deinit();
+
+    try testing.expect(hash_map.capacity == 16);
+    try testing.expect(hash_map.count == 0);
+    // TODO: add isEmpty or more service method when added later
+}
+
+test "Hash map init() initializes all the buckets with empty singly linked lists upon initilazation" {
+    const allocator = testing.allocator;
+    var hash_map = try HashMap([]const u8, u8).init(allocator);
+    defer hash_map.deinit();
+
+    for (hash_map.buckets) |*bucket| {
+        try testing.expectEqual(null, bucket.head);
+        try testing.expect(bucket.getSize() == 0);
+        try testing.expect(bucket.isEmpty());
+    }
+}
+
+test "hash map deinit() cleans up memory used by the hash map proberly" {
+    const allocator = testing.allocator;
+    var hash_map = try HashMap([]const u8, i8).init(allocator);
+
+    try hash_map.put("One", 1);
+    try hash_map.put("two", 2);
+    try hash_map.put("three", 3);
+
+    hash_map.deinit();
+    // the testing allocator will fail this test if there is a memory leak
 }

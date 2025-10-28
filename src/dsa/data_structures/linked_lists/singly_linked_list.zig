@@ -158,6 +158,19 @@ pub fn SinglyLinkedList(comptime T: type) type {
             return false;
         }
 
+        /// Remove the node that comes after the given node.
+        pub fn removeAfter(self: *Self, current: *Node(T)) bool {
+            if (current.next == null) return false;
+
+            const nodeToRemove = current.next.?;
+            current.next = nodeToRemove.next;
+
+            self.allocator.destroy(nodeToRemove);
+            self.size -= 1;
+
+            return true;
+        }
+
         /// Remove all occurrences of the given value.
         /// Returns true if at least one element was removed. false otherwise.
         pub fn removeAll(self: *Self, toRemove: T) bool {
@@ -371,19 +384,6 @@ pub fn SinglyLinkedList(comptime T: type) type {
             const newNode = try self.allocator.create(Node(T));
             newNode.* = Node(T).init(data);
             return newNode;
-        }
-
-        /// Remove the node that comes after the given node.
-        fn removeAfter(self: *Self, current: *Node(T)) bool {
-            if (current.next == null) return false;
-
-            const nodeToRemove = current.next.?;
-            current.next = nodeToRemove.next;
-
-            self.allocator.destroy(nodeToRemove);
-            self.size -= 1;
-
-            return true;
         }
 
         /// Gets a pointer to the middle node of the list

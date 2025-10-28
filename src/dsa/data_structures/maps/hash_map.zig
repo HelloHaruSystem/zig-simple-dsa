@@ -195,6 +195,44 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
             return null;
         }
 
+        /// Removes a key-value pair from the hash map by key
+        /// Returns the removed value if the key exists, otherwise returns null
+        /// Decrements the count by 1 when a pair is removed
+        pub fn remove(self: *Self, key: key_type) ?value_type {
+            if (self.count == 0) return null;
+
+            const hashed_key = hash(key);
+            const index = self.getIndex(hashed_key);
+            var bucket = &self.buckets[index];
+
+            // if the key to remove is the head of the linked list
+            if (bucket.head) |head| {
+                if (keysEqual(head.data.key, key)) {
+                    const value = bucket.popHead().?.value;
+                    self.count -= 1;
+                    return value;
+                }
+            }
+
+            // otherwise
+            var current = bucket.head;
+            while (current) |node| {
+                if (node.next) |next_node| {
+                    if (keysEqual(next_node.data.key, key)) {
+                        const value = next_node.data.value;
+                        _ = bucket.removeAfter(node);
+                        self.count -= 1;
+
+                        return value;
+                    }
+                }
+
+                current = node.next;
+            }
+
+            return null;
+        }
+
         // TODO: remove(key), contains(key) maybe an iterator to iterate over keys and values
         // TODO: TEST TEST TEST :)
 
@@ -363,4 +401,46 @@ test "get returns null on hash map with a count of 0" {
     defer hash_map.deinit();
 
     try testing.expectEqual(null, hash_map.get(1));
+}
+
+test "remove method basic functionality" {
+    const allocator = testing.allocator;
+    var hash_map = try HashMap(i32, i64).init(allocator);
+    defer hash_map.deinit();
+
+    try hash_map.put(32, 64);
+    try hash_map.put(64, 128);
+    try hash_map.put(128, 256);
+
+    try testing.expect(hash_map.count == 3);
+    try testing.expectEqual(64, hash_map.remove(32));
+    try testing.expect(hash_map.count == 2);
+    try testing.expectEqual(128, hash_map.remove(64));
+    try testing.expect(hash_map.count == 1);
+    try testing.expectEqual(256, hash_map.remove(128));
+    try testing.expect(hash_map.count == 0);
+    // TODO: use contains when implemented to check if the values are gone
+}
+
+test "remove returns null when key isn't found in the hash map" {
+    const allocator = testing.allocator;
+    var hash_map = try HashMap(u8, u8).init(allocator);
+    defer hash_map.deinit();
+
+    try hash_map.put('a', 'A');
+    try hash_map.put('b', 'B');
+
+    try testing.expectEqual('A', hash_map.remove('a'));
+    try testing.expectEqual('B', hash_map.remove('b'));
+    try testing.expectEqual(null, hash_map.remove('c'));
+    // TODO: use contains when implemented to check if the values are gone
+}
+
+test "remove returns null called on an empty hash map" {
+    const allocator = testing.allocator;
+    var hash_map = try HashMap(u8, u8).init(allocator);
+    defer hash_map.deinit();
+
+    try testing.expectEqual(null, hash_map.remove('x'));
+    try testing.expect(hash_map.count == 0);
 }

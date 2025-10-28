@@ -15,3 +15,9 @@
 - [ ] Ring buffer Push() method to not return overwritten value to make the API more intuitive
 - [ ] Use std.meta.eql fir generic equality comparisons in data structures
 - [ ] Make linked list iterators implementations more Zig idiomatic
+
+### Potential stuff i wanna do for trees
+- Self-balancing (AVL rotations!)
+- Red-Black trees (color rules!)
+- Tree metrics (height, balance factor)
+- Do things iteratively and recursively

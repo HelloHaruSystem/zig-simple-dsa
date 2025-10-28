@@ -63,6 +63,10 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
             return hasher.final();
         }
 
+        fn getIndex(self: *const Self, key_hash: u64) usize {
+            return @as(usize, key_hash % self.capacity);
+        }
+
         /// Inter hash function similiar to the regular hash function
         /// But used to hash strings(slices)
         fn hashSlice(key: key_type) u64 {
@@ -139,7 +143,7 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
 
         pub fn put(self: *Self, key: key_type, value: value_type) !void {
             const hashed_key = hash(key);
-            const index: usize = hashed_key % self.capacity;
+            const index = self.getIndex(hashed_key);
             var bucket = &self.buckets[index];
             var current = bucket.head;
 
@@ -163,6 +167,27 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
             if (should_expand) {
                 try self.expand();
             }
+        }
+
+        pub fn get(self: *const Self, key: key_type) ?value_type {
+            if (self.count == 0) return null;
+
+            const hashed_key = hash(key);
+            const index = self.getIndex(hashed_key);
+
+            var current = self.buckets[index].head;
+
+            while (current) |node| {
+                const entry = node.data;
+
+                if (keysEqual(entry.key, key)) {
+                    return entry.value;
+                }
+
+                current = node.next;
+            }
+
+            return null;
         }
 
         // TODO: get(), remove(key), contains(key) maybe an iterator to iterate over keys and values
@@ -224,7 +249,9 @@ test "put method basic functionality" {
 
     try testing.expect(hash_map.count == 3);
     try testing.expect(hash_map.capacity == 16);
-    // TODO: and get calls and remove calls when implemented
+    try testing.expectEqual("two", hash_map.get("one"));
+    try testing.expectEqual("three", hash_map.get("two"));
+    try testing.expectEqual("four", hash_map.get("three"));
 }
 
 test "put method will automatically expand the capacity if needed and old values are still accessable" {
@@ -241,9 +268,11 @@ test "put method will automatically expand the capacity if needed and old values
     try testing.expect(hash_map.capacity == 32);
 
     // test if old values are still accessable
-    //for (0..12) |i| {
-    //    try testing.expectEqual(@intCast(i + 1), hash_map.get(i));
-    //}
+    for (0..12) |i| {
+        const key: i32 = @intCast(i);
+        const expected_value: i32 = @intCast(i + 1);
+        try testing.expectEqual(expected_value, hash_map.get(key).?);
+    }
 }
 
 test "put method called with empty string as key" {
@@ -251,7 +280,9 @@ test "put method called with empty string as key" {
     var hash_map = try HashMap([]const u8, i32).init(allocator);
     defer hash_map.deinit();
 
-    try hash_map.put("", 2); // THIS WORKS????? need fix
+    try hash_map.put("", 2);
+
+    try testing.expectEqual(2, hash_map.get(""));
 }
 
 test "put method called with empty string as value" {
@@ -259,7 +290,9 @@ test "put method called with empty string as value" {
     var hash_map = try HashMap(i32, []const u8).init(allocator);
     defer hash_map.deinit();
 
-    try hash_map.put(2, ""); // THIS WORKS????? maybe thast okay???
+    try hash_map.put(2, "");
+
+    try testing.expectEqual("", hash_map.get(2));
 }
 
 test "put method with same key overwrites without inserting a new entry" {
@@ -283,7 +316,7 @@ test "put method with same key overwrites without inserting a new entry" {
     }
 
     try testing.expect(hash_map.count == 2);
-    // try testing.expectEqual("Farvel med dig", hash_map.get(1)); // add this when get is implemented
-    // try testing.expectEqual("Hej med dig", hash_map.get(2));    // add this when get is implemented
+    try testing.expectEqual("Farvel med dig", hash_map.get(1));
+    try testing.expectEqual("Hej med dig", hash_map.get(2));
     try testing.expect(counter == 2);
 }

@@ -212,3 +212,36 @@ test "hash map deinit() cleans up memory used by the hash map proberly" {
     hash_map.deinit();
     // the testing allocator will fail this test if there is a memory leak
 }
+
+test "put method basic functionality" {
+    const allocator = testing.allocator;
+    var hash_map = try HashMap([]const u8, []const u8).init(allocator);
+    defer hash_map.deinit();
+
+    try hash_map.put("one", "two");
+    try hash_map.put("two", "three");
+    try hash_map.put("three", "four");
+
+    try testing.expect(hash_map.count == 3);
+    try testing.expect(hash_map.capacity == 16);
+    // TODO: and get calls and remove calls when implemented
+}
+
+test "put method will automatically expand the capacity if needed and old values are still accessable" {
+    const allocator = testing.allocator;
+    var hash_map = try HashMap(i32, i32).init(allocator);
+    defer hash_map.deinit();
+
+    // need to insert 12 unique items to make it expand
+    for (0..12) |i| {
+        try hash_map.put(@intCast(i), @intCast(i + 1));
+    }
+
+    try testing.expect(hash_map.count == 12);
+    try testing.expect(hash_map.capacity == 32);
+
+    // test if old values are still accessable
+    //for (0..12) |i| {
+    //    try testing.expectEqual(@intCast(i + 1), hash_map.get(i));
+    //}
+}

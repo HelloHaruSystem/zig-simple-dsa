@@ -19,8 +19,8 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
         /// The number of entries into the hash map
         count: usize,
 
-        /// Initilaizes an empty hash map
-        /// Initiliazes the default 16 buckets(singly linked list) open first initilazation
+        /// Initializes an empty hash map
+        /// Initializes the default 16 buckets(singly linked list) upon first initialization
         pub fn init(allocator: std.mem.Allocator) !Self {
             const buckets = try allocator.alloc(LinkedList(Entry), 16);
 
@@ -62,7 +62,7 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
             return std.meta.eql(key_a, key_b);
         }
 
-        /// Internal function to check if the hash map needs to expand it's capacity
+        /// Internal function to check if the hash map needs to expand its capacity
         fn checkLoadFactor(self: *Self) bool {
             if (self.count == 0) return false;
             const load_factor = @as(f64, @floatFromInt(self.count)) / @as(f64, @floatFromInt(self.capacity));
@@ -74,7 +74,7 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
             return false;
         }
 
-        /// Internal function that expands the current capactiy *2 of the hashmap
+        /// Internal function that expands the current capacity *2 of the hashmap
         /// It also rehashes the current entries
         fn expand(self: *Self) !void {
             const new_capacity: usize = self.capacity * 2;
@@ -131,6 +131,7 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
                 current = node.next;
             }
 
+            // if key doesn't exist already prepend the new entry to the bucket(singly linked list)
             try bucket.prepend(Entry{
                 .key = key,
                 .value = value,
@@ -146,7 +147,9 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
         // TODO: get(), remove(key), contains(key) maybe an iterator to iterate over keys and values
         // TODO: TEST TEST TEST :)
 
-        // a entry for the bucket containing a key and value pair
+        /// Internal struct used to hold the key, value pair used in the hashmap
+        /// It's generic both for key and value and the Wyhash should be able to hash
+        /// more complex structs if they are used as keys if needed
         const Entry = struct {
             key: key_type,
             value: value_type,

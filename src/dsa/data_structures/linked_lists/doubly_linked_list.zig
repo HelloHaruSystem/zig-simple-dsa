@@ -310,7 +310,7 @@ pub fn DoublyLinkedList(comptime T: type) type {
 }
 
 /// A node in the doubly linked list
-fn Node(comptime T: type) type {
+pub fn Node(comptime T: type) type {
     return struct {
         const Self = @This();
         value: T,

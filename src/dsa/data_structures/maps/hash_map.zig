@@ -253,6 +253,36 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
             return false;
         }
 
+        pub const Iterator = struct {
+            map: *const Self,
+            bucket_index: usize,
+            current: ?*LinkedList(Entry).Node,
+
+            pub fn next(self: *Iterator) ?Entry {
+                while (self.bucket_index < self.map.buckets.len) {
+                    if (self.current) |node| {
+                        const entry = node.data;
+                        self.current = node.next;
+                        return entry;
+                    }
+
+                    self.bucket_index += 1;
+                    if (self.bucket_index < self.map.buckets.len) {
+                        self.current = self.map.buckets[self.bucket_index].head;
+                    }
+                }
+
+                return null;
+            }
+        };
+
+        pub fn iterator(self: *const Self) Iterator {
+            return Iterator{
+                .map = self,
+                .bucket_index = 0,
+                .current = if (self.buckets.len > 0) self.buckets[0].head else null,
+            };
+        }
         // TODO: Maybe an iterator to iterate over keys and values?
 
         /// Internal struct used to hold the key, value pair used in the hashmap

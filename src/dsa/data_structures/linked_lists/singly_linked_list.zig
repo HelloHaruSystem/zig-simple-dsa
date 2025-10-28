@@ -461,7 +461,7 @@ pub fn SinglyLinkedList(comptime T: type) type {
 }
 
 /// A node in the singly linked list.
-fn Node(comptime T: type) type {
+pub fn Node(comptime T: type) type {
     return struct {
         const Self = @This();
 

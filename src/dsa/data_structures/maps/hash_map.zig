@@ -1,9 +1,10 @@
 const std = @import("std");
 const LinkedList = @import("../linked_lists/singly_linked_list.zig").SinglyLinkedList;
+const Node = @import("../linked_lists/singly_linked_list.zig").Node;
 const testing = std.testing;
 
 /// A simple implementation of a hash map.
-/// default capacity is 16 and it uses std.Wyhash for hashing
+/// Default capacity is 16 and it uses std.Wyhash for hashing
 pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
     return struct {
         const Self = @This();
@@ -21,7 +22,7 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
         count: usize,
 
         /// Initializes an empty hash map
-        /// Initializes the default 16 buckets(singly linked list) upon first initialization
+        /// Initializes the default 16 buckets (singly linked list) upon first initialization
         pub fn init(allocator: std.mem.Allocator) !Self {
             const buckets = try allocator.alloc(LinkedList(Entry), 16);
 
@@ -67,15 +68,15 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
             return @as(usize, key_hash % self.capacity);
         }
 
-        /// Inter hash function similiar to the regular hash function
-        /// But used to hash strings(slices)
+        /// Internal hash function similar to the regular hash function
+        /// Used ti hash slices
         fn hashSlice(key: key_type) u64 {
             return std.hash.Wyhash.hash(0, key);
         }
 
         /// Internal function that checks for equal keys
         /// using std.meta.eql()
-        /// in case of slices it will use std.mem.eql to compare byte-to-byte
+        /// In case of slices it will use std.mem.eql to compare element by element
         fn keysEqual(key_a: key_type, key_b: key_type) bool {
             const type_info = @typeInfo(key_type);
 
@@ -99,7 +100,7 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
             return false;
         }
 
-        /// Internal function that expands the current capacity *2 of the hashmap
+        /// Internal function that expands the current capacity by 2x of the hashmap
         /// It also rehashes the current entries
         fn expand(self: *Self) !void {
             const new_capacity: usize = self.capacity * 2;
@@ -141,7 +142,7 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
             self.capacity = new_capacity;
         }
 
-        /// Inserts a key, value pair into the hash map
+        /// Inserts a key-value pair into the hash map
         /// This method will overwrite previous value if the same key is given
         /// This will also expand the capacity and rehash the current inserted values if needed
         pub fn put(self: *Self, key: key_type, value: value_type) !void {
@@ -172,7 +173,7 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
             }
         }
 
-        /// Takes a key as argument and finds the value matching for that key in the hashmap
+        /// Takes a key as argument and finds the value for the given key in the hash map
         /// If no matching key is found in the hash map then this method will return null
         pub fn get(self: *const Self, key: key_type) ?value_type {
             if (self.count == 0) return null;
@@ -233,8 +234,7 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
             return null;
         }
 
-        /// Returns true if the hash map contains the given key
-        /// Otherwise false
+        /// Returns true if the hash map contains the given key, otherwise false
         pub fn contains(self: *Self, key: key_type) bool {
             if (self.count == 0) return false;
 
@@ -253,11 +253,15 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
             return false;
         }
 
+        /// Iterator struct for traversing key-value pairs
+        /// Create an iterator by calling the iterator() method on your hash map
         pub const Iterator = struct {
             map: *const Self,
             bucket_index: usize,
-            current: ?*LinkedList(Entry).Node,
+            current: ?*Node(Entry),
 
+            /// Returns the next key-value pair in the iteration
+            /// Returns null when all entries have been visited
             pub fn next(self: *Iterator) ?Entry {
                 while (self.bucket_index < self.map.buckets.len) {
                     if (self.current) |node| {
@@ -276,6 +280,10 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
             }
         };
 
+        /// Creates an iterator for traversing all entries in the hash map
+        /// The iteration order is unordered and depends on internal hashing
+        /// Call next() on the iterator to get each entry containing the key and value
+        /// Returns null when no more entries are available
         pub fn iterator(self: *const Self) Iterator {
             return Iterator{
                 .map = self,
@@ -283,7 +291,6 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
                 .current = if (self.buckets.len > 0) self.buckets[0].head else null,
             };
         }
-        // TODO: Maybe an iterator to iterate over keys and values?
 
         /// Internal struct used to hold the key, value pair used in the hashmap
         /// It's generic both for key and value and the Wyhash should be able to hash
@@ -346,7 +353,7 @@ test "put method basic functionality" {
     try testing.expectEqual("four", hash_map.get("three"));
 }
 
-test "put method will automatically expand the capacity if needed and old values are still accessable" {
+test "put method will automatically expand the capacity if needed and old values are still accessible" {
     const allocator = testing.allocator;
     var hash_map = try HashMap(i32, i32).init(allocator);
     defer hash_map.deinit();
@@ -359,7 +366,7 @@ test "put method will automatically expand the capacity if needed and old values
     try testing.expect(hash_map.count == 12);
     try testing.expect(hash_map.capacity == 32);
 
-    // test if old values are still accessable
+    // test if old values are still accessible
     for (0..12) |i| {
         const key: i32 = @intCast(i);
         const expected_value: i32 = @intCast(i + 1);
@@ -523,4 +530,50 @@ test "contains method basic functionality" {
     try testing.expect(hash_map.contains("blue"));
     try testing.expectEqual("#0000FF", hash_map.remove("blue").?);
     try testing.expect(!hash_map.contains("blue"));
+}
+
+test "iterator basic functionality" {
+    const allocator = testing.allocator;
+    var hash_map = try HashMap(u8, f64).init(allocator);
+    defer hash_map.deinit();
+
+    try hash_map.put(1, 101.404);
+    try hash_map.put(2, 202.808);
+    try hash_map.put(3, 404.16016);
+    var count: usize = 0;
+    var iter = hash_map.iterator();
+
+    while (iter.next()) |entry| {
+        count += 1;
+        try testing.expectEqual(@as(f64, entry.value), hash_map.get(entry.key).?);
+    }
+
+    try testing.expectEqual(@as(usize, 3), count);
+}
+
+test "iterator on empty hash map" {
+    const allocator = testing.allocator;
+    var hash_map = try HashMap(i32, u8).init(allocator);
+    defer hash_map.deinit();
+
+    var iter = hash_map.iterator();
+    try testing.expectEqual(null, iter.next());
+}
+
+test "iterator iterates over all entries after expansion and rehashing" {
+    const allocator = testing.allocator;
+    var hash_map = try HashMap(usize, i32).init(allocator);
+    defer hash_map.deinit();
+
+    for (0..12) |i| {
+        try hash_map.put(i, @intCast(i * 2));
+    }
+
+    var count: usize = 0;
+    var iter = hash_map.iterator();
+    while (iter.next()) |_| {
+        count += 1;
+    }
+
+    try testing.expectEqual(@as(usize, 12), count);
 }

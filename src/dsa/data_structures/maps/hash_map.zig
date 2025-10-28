@@ -1,16 +1,26 @@
 const std = @import("std");
 const LinkedList = @import("../linked_lists/singly_linked_list.zig").SinglyLinkedList;
 
+/// A simple implementation of a hash map.
+/// default capacity is 16 and it uses std.Wyhash for hashing
 pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
     return struct {
         const Self = @This();
 
         // fields
+        /// The allocator used to allocate the memory needed by the hash map
         allocator: std.mem.Allocator,
+        /// The buckets holding the entries of the hash map
+        /// This is a singly linked list that can hold multiple entries in case of a collision
         buckets: []LinkedList(Entry),
+        /// Capactiy of the hash map
+        /// Defaults to 16 but expands when the number of entries / capacity exceeds 0.75
         capacity: usize,
+        /// The number of entries into the hash map
         count: usize,
 
+        /// Initilaizes an empty hash map
+        /// Initiliazes the default 16 buckets(singly linked list) open first initilazation
         pub fn init(allocator: std.mem.Allocator) !Self {
             const buckets = try allocator.alloc(LinkedList(Entry), 16);
 
@@ -26,6 +36,7 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
             };
         }
 
+        /// Frees the memory used by the hash map
         pub fn deinit(self: *Self) void {
             for (self.buckets) |*bucket| {
                 bucket.deinit();
@@ -34,8 +45,8 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
             self.allocator.free(self.buckets);
         }
 
-        // internal hash function
-        // using std Wyhash
+        /// Internal hash function
+        /// Using std.Wyhash to hash the keys
         fn hash(key: key_type) u64 {
             // using 0 as seed (mostly to make testing easier)
             // consider using std.crypto.random.int(u64) in the future
@@ -45,12 +56,13 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
             return hasher.final();
         }
 
-        // internal function to check for equal keys
+        /// Internal function that checks for equal keys
+        /// using std.meta.eql()
         fn keysEqual(key_a: key_type, key_b: key_type) bool {
             return std.meta.eql(key_a, key_b);
         }
 
-        // internal function looking to see if we need to expand the capacity
+        /// Internal function to check if the hash map needs to expand it's capacity
         fn checkLoadFactor(self: *Self) bool {
             if (self.count == 0) return false;
             const load_factor = @as(f64, @floatFromInt(self.count)) / @as(f64, @floatFromInt(self.capacity));
@@ -62,8 +74,8 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
             return false;
         }
 
-        // internal function to expand the current capacity and rehash the current entries
-        // into a new array 2x the size of the current
+        /// Internal function that expands the current capactiy *2 of the hashmap
+        /// It also rehashes the current entries
         fn expand(self: *Self) !void {
             const new_capacity: usize = self.capacity * 2;
             const new_buckets =

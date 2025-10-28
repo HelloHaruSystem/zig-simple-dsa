@@ -100,7 +100,7 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
             return false;
         }
 
-        /// Internal function that expands the current capacity by 2x of the hashmap
+        /// Internal function that expands the current capacity by 2x for the hash map
         /// It also rehashes the current entries
         fn expand(self: *Self) !void {
             const new_capacity: usize = self.capacity * 2;
@@ -292,7 +292,7 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
             };
         }
 
-        /// Internal struct used to hold the key, value pair used in the hashmap
+        /// Internal struct used to hold the key, value pair used in the hash map
         /// It's generic both for key and value and the Wyhash should be able to hash
         /// more complex structs if they are used as keys if needed
         const Entry = struct {

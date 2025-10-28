@@ -9,6 +9,14 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
     return struct {
         const Self = @This();
 
+        /// Internal struct used to hold the key, value pair used in the hash map
+        /// It's generic both for key and value and the Wyhash should be able to hash
+        /// more complex structs if they are used as keys if needed
+        const Entry = struct {
+            key: key_type,
+            value: value_type,
+        };
+
         // fields
         /// The allocator used to allocate the memory needed by the hash map
         allocator: std.mem.Allocator,
@@ -69,7 +77,7 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
         }
 
         /// Internal hash function similar to the regular hash function
-        /// Used ti hash slices
+        /// Used to hash slices
         fn hashSlice(key: key_type) u64 {
             return std.hash.Wyhash.hash(0, key);
         }
@@ -235,7 +243,7 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
         }
 
         /// Returns true if the hash map contains the given key, otherwise false
-        pub fn contains(self: *Self, key: key_type) bool {
+        pub fn contains(self: *const Self, key: key_type) bool {
             if (self.count == 0) return false;
 
             const hashed_key = hash(key);
@@ -291,14 +299,6 @@ pub fn HashMap(comptime key_type: type, comptime value_type: type) type {
                 .current = if (self.buckets.len > 0) self.buckets[0].head else null,
             };
         }
-
-        /// Internal struct used to hold the key, value pair used in the hash map
-        /// It's generic both for key and value and the Wyhash should be able to hash
-        /// more complex structs if they are used as keys if needed
-        const Entry = struct {
-            key: key_type,
-            value: value_type,
-        };
     };
 }
 

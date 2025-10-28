@@ -4,7 +4,7 @@ Practicing data structures and algorithms while getting comfortable with Zig syn
 
 ## Why?
 - Practice Zig programming fundamentals
-- Implement everything from scratch to understand the internals
+- Implement everything from scratch to understand the internals :)
 
 ## Topics to Cover
 
@@ -13,7 +13,7 @@ Practicing data structures and algorithms while getting comfortable with Zig syn
 - [x] Linked Lists
 - [x] Ring Buffer
 - [x] Stacks & Queues
-- [ ] Hash Maps
+- [x] Hash Map
 - [ ] Binary Trees
 - [ ] Heaps
 

@@ -189,7 +189,7 @@ test "Hash map init() creates an empty hash map with a capacity of 16, count as 
     // TODO: add isEmpty or more service method when added later
 }
 
-test "Hash map init() initializes all the buckets with empty singly linked lists upon initilazation" {
+test "Hash map init() initializes all the buckets with empty singly linked lists upon initialization" {
     const allocator = testing.allocator;
     var hash_map = try HashMap([]const u8, u8).init(allocator);
     defer hash_map.deinit();
@@ -201,7 +201,7 @@ test "Hash map init() initializes all the buckets with empty singly linked lists
     }
 }
 
-test "hash map deinit() cleans up memory used by the hash map proberly" {
+test "hash map deinit() cleans up memory used by the hash map properly" {
     const allocator = testing.allocator;
     var hash_map = try HashMap([]const u8, i8).init(allocator);
 
@@ -244,4 +244,46 @@ test "put method will automatically expand the capacity if needed and old values
     //for (0..12) |i| {
     //    try testing.expectEqual(@intCast(i + 1), hash_map.get(i));
     //}
+}
+
+test "put method called with empty string as key" {
+    const allocator = testing.allocator;
+    var hash_map = try HashMap([]const u8, i32).init(allocator);
+    defer hash_map.deinit();
+
+    try hash_map.put("", 2); // THIS WORKS????? need fix
+}
+
+test "put method called with empty string as value" {
+    const allocator = testing.allocator;
+    var hash_map = try HashMap(i32, []const u8).init(allocator);
+    defer hash_map.deinit();
+
+    try hash_map.put(2, ""); // THIS WORKS????? maybe thast okay???
+}
+
+test "put method with same key overwrites without inserting a new entry" {
+    const allocator = testing.allocator;
+    var hash_map = try HashMap(i32, []const u8).init(allocator);
+    defer hash_map.deinit();
+    var counter: usize = 0;
+
+    try hash_map.put(1, "Hej med dig");
+    try hash_map.put(1, "Farvel med dig");
+    try hash_map.put(2, "Farvel med dig");
+    try hash_map.put(2, "Hej med dig");
+    // iterate to see if you only find 2 entries
+    for (hash_map.buckets) |*bucket| {
+        var current = bucket.head;
+
+        while (current) |node| {
+            counter += 1;
+            current = node.next;
+        }
+    }
+
+    try testing.expect(hash_map.count == 2);
+    // try testing.expectEqual("Farvel med dig", hash_map.get(1)); // add this when get is implemented
+    // try testing.expectEqual("Hej med dig", hash_map.get(2));    // add this when get is implemented
+    try testing.expect(counter == 2);
 }

@@ -10,30 +10,30 @@ pub fn Stack(comptime T: type) type {
         // fields
         /// Stack is using a dynamic array as the underlying data structure.
         /// The dynamic array owns and is responsible for allocating the memory needed to store new items in the Stack
-        _dynamic_array: dynamic_array.DynamicArray(T),
+        dynamic_array: dynamic_array.DynamicArray(T),
 
         /// Initializes an empty stack
         pub fn init(allocator: std.mem.Allocator) !Self {
             return Self{
-                ._dynamic_array = try dynamic_array.DynamicArray(T).initDefault(allocator),
+                .dynamic_array = try dynamic_array.DynamicArray(T).initDefault(allocator),
             };
         }
 
         /// Frees the memory used by the stack
         pub fn deinit(self: *Self) void {
-            self._dynamic_array.deinit();
+            self.dynamic_array.deinit();
         }
 
         /// Pushes a new element on top of the stack
         pub fn push(self: *Self, value: T) !void {
-            try self._dynamic_array.append(value);
+            try self.dynamic_array.append(value);
         }
 
         /// Pops the last inserted item in the stack
         /// Returning it and removing it from the stack
         /// if the stack is empty this function will return null
         pub fn pop(self: *Self) ?T {
-            return self._dynamic_array.pop();
+            return self.dynamic_array.pop();
         }
 
         /// Returns the last inserted item in the stack
@@ -42,7 +42,7 @@ pub fn Stack(comptime T: type) type {
         pub fn peek(self: *const Self) ?T {
             if (self.getSize() == 0) return null;
 
-            const value_pointer = self._dynamic_array.get(self.getSize() - 1);
+            const value_pointer = self.dynamic_array.get(self.getSize() - 1);
 
             if (value_pointer) |value| {
                 return value.*;
@@ -53,7 +53,7 @@ pub fn Stack(comptime T: type) type {
 
         /// Returns the current size of the stack
         pub fn getSize(self: *const Self) usize {
-            return self._dynamic_array.getSize();
+            return self.dynamic_array.getSize();
         }
 
         /// returns true if the stack is empty otherwise false

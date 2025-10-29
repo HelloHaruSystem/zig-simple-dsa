@@ -19,52 +19,40 @@ pub fn Deque(comptime T: type) type {
             self.doubly_linked_list.deinit();
         }
 
-        // TODO: Implement
-        pub fn pushFront(self: *Self, value: T) void {
-            _ = self;
-            _ = value;
+        pub fn pushFront(self: *Self, value: T) !void {
+            try self.doubly_linked_list.prepend(value);
         }
 
-        // TODO: Implement
-        pub fn pushBack(self: *Self, value: T) void {
-            _ = self;
-            _ = value;
+        pub fn pushBack(self: *Self, value: T) !void {
+            try self.doubly_linked_list.append(value);
         }
 
-        // TODO: Implement
         pub fn popFront(self: *Self) ?T {
-            _ = self;
-            return null;
+            return self.doubly_linked_list.popHead();
         }
 
-        // TODO: Implement
         pub fn popBack(self: *Self) ?T {
-            _ = self;
-            return null;
+            return self.doubly_linked_list.popTail();
         }
 
-        // TODO: Implement
         pub fn peekFront(self: *const Self) ?T {
-            _ = self;
-            return null;
+            return self.doubly_linked_list.peekHead();
         }
 
-        // TODO: Implement
         pub fn peekBack(self: *const Self) ?T {
-            _ = self;
-            return null;
+            return self.doubly_linked_list.peekTail();
         }
 
-        // TODO: Implement
         pub fn getSize(self: *const Self) usize {
-            _ = self;
-            return 0;
+            return self.doubly_linked_list.getSize();
         }
 
-        // TODO: Implement
         pub fn isEmpty(self: *const Self) bool {
-            _ = self;
-            return true;
+            return self.getSize() == 0;
+        }
+
+        pub fn clear(self: *Self) void {
+            self.doubly_linked_list.clear();
         }
     };
 }

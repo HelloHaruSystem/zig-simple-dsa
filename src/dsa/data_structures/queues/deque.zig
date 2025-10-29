@@ -98,7 +98,7 @@ test "Deque deinit method frees the memory used by the deque" {
     // the testing allocator will fail this test in case of a memory leak
 }
 
-test "pushFront method basic funtionality" {
+test "pushFront method basic functionality" {
     const allocator = testing.allocator;
     var deque = Deque(i32).init(allocator);
     defer deque.deinit();
@@ -176,7 +176,7 @@ test "popBack returns null on empty deque" {
     try testing.expectEqual(null, deque.popBack());
 }
 
-test "peekFront method basic funtionality" {
+test "peekFront method basic functionality" {
     const allocator = testing.allocator;
     var deque = Deque(f128).init(allocator);
     defer deque.deinit();
@@ -198,7 +198,7 @@ test "peekFront returns null on empty deque" {
     try testing.expectEqual(null, deque.peekFront());
 }
 
-test "peekBack method basic funtionality" {
+test "peekBack method basic functionality" {
     const allocator = testing.allocator;
     var deque = Deque([]const u8).init(allocator);
     defer deque.deinit();
@@ -220,7 +220,7 @@ test "peekBack returns null on empty deque" {
     try testing.expectEqual(null, deque.peekBack());
 }
 
-test "getSize basic funtionality" {
+test "getSize basic functionality" {
     const allocator = testing.allocator;
     var deque = Deque(u8).init(allocator);
     defer deque.deinit();

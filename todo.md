@@ -8,7 +8,7 @@
 - [x] Stack (using dynamic array)
 - [x] Queue (doubly linked list)
 - [x] Hash Map (array of linked list)
-- [ ] Deque (using doubly linked list)
+- [x] Deque (using doubly linked list)
 
 ## Potential improvements
 - [ ] Merge Sort space complexity in linked lists (implement with pointer manipulation only)

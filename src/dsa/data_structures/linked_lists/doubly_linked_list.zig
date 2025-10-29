@@ -82,7 +82,7 @@ pub fn DoublyLinkedList(comptime T: type) type {
 
         /// Look at the last element without removing it
         /// Returns null if the list is empty
-        pub fn peekTail(self: *Self) ?T {
+        pub fn peekTail(self: *const Self) ?T {
             if (self.tail) |tail| {
                 return tail.value;
             }

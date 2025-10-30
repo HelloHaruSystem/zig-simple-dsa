@@ -3,10 +3,31 @@ const Stack = @import("../data_structures/stacks/stack.zig").Stack;
 
 // Depths first searchers
 pub const DepthsFirstSearch = struct {
-    // TODO: Pre-order
-    pub fn PreOrder() void {}
-    // TODO: In-order
-    pub fn InOrder() void {}
+    pub fn printPreOrderRecursive(writer: *std.Io.writer, comptime NodeType: type, node: ?*NodeType) !void {
+        validNode(NodeType);
+
+        if (node) |n| {
+            // print
+            try printValue(writer, NodeType, n);
+            // left
+            try printPreOrderRecursive(writer, NodeType, n.left);
+            // right
+            try printPreOrderRecursive(writer, NodeType, n.right);
+        }
+    }
+
+    pub fn printInOrderRecursive(writer: *std.Io.Writer, comptime NodeType: type, node: ?*NodeType) !void {
+        validNode(NodeType);
+
+        if (node) |n| {
+            // left
+            try printInOrderRecursive(writer, NodeType, n.left);
+            // print
+            try printValue(writer, NodeType, n);
+            // right
+            try printInOrderRecursive(writer, NodeType, n.right);
+        }
+    }
 
     // post-order
     // works for all binary trees using comptime duck typing
@@ -14,13 +35,13 @@ pub const DepthsFirstSearch = struct {
     pub fn printPostOrderRecursive(writer: *std.Io.Writer, comptime NodeType: type, node: ?*NodeType) !void {
         validNode(NodeType);
 
-        if (node) |not_null| {
+        if (node) |n| {
             // left
-            try printPostOrderRecursive(writer, NodeType, not_null.left);
+            try printPostOrderRecursive(writer, NodeType, n.left);
             // right
-            try printPostOrderRecursive(writer, NodeType, not_null.right);
+            try printPostOrderRecursive(writer, NodeType, n.right);
             // visit
-            try printValue(writer, NodeType, not_null);
+            try printValue(writer, NodeType, n);
         }
     }
 
@@ -57,7 +78,7 @@ pub const DepthsFirstSearch = struct {
         }
     }
 
-    // helper function
+    // helper functions
     fn validNode(comptime NodeType: type) void {
         // TODO: Implement proper error unions to use here
         if (!@hasField(NodeType, "value")) {

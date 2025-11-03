@@ -180,3 +180,53 @@ test "printPreOrderRecursive basic functionality" {
 
     try testing.expectEqualStrings(expected, output);
 }
+
+test "printInOrderRecursive basic functionality" {
+    const allocator = testing.allocator;
+    var bst = Bst(i32).init(allocator);
+    defer bst.deinit();
+
+    try bst.insertIterative(128);
+    try bst.insertIterative(32);
+    try bst.insertIterative(16);
+    try bst.insertRecursively(64);
+    try bst.insertRecursively(2048);
+    try bst.insertRecursively(1024);
+
+    var buffer: [1024]u8 = undefined;
+    var writer: std.Io.Writer = .fixed(&buffer);
+
+    try DepthsFirstSearch.printInOrderRecursive(&writer, Bst(i32).Node, bst.root);
+
+    const output = buffer[0..writer.end];
+
+    // In-order: 16, 32, 64, 128, 1024, 2048
+    const expected = "16\n32\n64\n128\n1024\n2048\n";
+
+    try testing.expectEqualStrings(expected, output);
+}
+
+test "printPostOrderRecursive basic functionality" {
+    const allocator = testing.allocator;
+    var bst = Bst(i32).init(allocator);
+    defer bst.deinit();
+
+    try bst.insertIterative(128);
+    try bst.insertIterative(32);
+    try bst.insertIterative(16);
+    try bst.insertRecursively(64);
+    try bst.insertRecursively(2048);
+    try bst.insertRecursively(1024);
+
+    var buffer: [1024]u8 = undefined;
+    var writer: std.Io.Writer = .fixed(&buffer);
+
+    try DepthsFirstSearch.printPostOrderRecursive(&writer, Bst(i32).Node, bst.root);
+
+    const output = buffer[0..writer.end];
+
+    // Post-order: 16, 64, 32, 1024, 2048, 128
+    const expected = "16\n64\n32\n1024\n2048\n128\n";
+
+    try testing.expectEqualStrings(expected, output);
+}

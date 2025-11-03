@@ -1,5 +1,7 @@
 const std = @import("std");
 const Stack = @import("../data_structures/stacks/stack.zig").Stack;
+const Bst = @import("../data_structures/trees/binary_search_tree.zig").BinarySearchTree;
+const testing = std.testing;
 
 // Depth first searchers
 pub const DepthsFirstSearch = struct {
@@ -152,3 +154,29 @@ pub const DepthsFirstSearch = struct {
         try writer.flush();
     }
 };
+
+// tests
+test "printPreOrderRecursive basic functionality" {
+    const allocator = testing.allocator;
+    var bst = Bst(i32).init(allocator);
+    defer bst.deinit();
+
+    try bst.insertIterative(128);
+    try bst.insertIterative(32);
+    try bst.insertIterative(16);
+    try bst.insertRecursively(64);
+    try bst.insertRecursively(2048);
+    try bst.insertRecursively(1024);
+
+    var buffer: [1024]u8 = undefined;
+    var writer: std.Io.Writer = .fixed(&buffer);
+
+    try DepthsFirstSearch.printPreOrderRecursive(&writer, Bst(i32).Node, bst.root);
+
+    const output = buffer[0..writer.end];
+
+    // Pre-order: 128, 32, 16, 64, 2048, 1024
+    const expected = "128\n32\n16\n64\n2048\n1024\n";
+
+    try testing.expectEqualStrings(expected, output);
+}

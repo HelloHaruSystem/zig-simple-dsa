@@ -1,9 +1,9 @@
 const std = @import("std");
 const Stack = @import("../data_structures/stacks/stack.zig").Stack;
 
-// Depths first searchers
+// Depth first searchers
 pub const DepthsFirstSearch = struct {
-    pub fn printPreOrderRecursive(writer: *std.Io.writer, comptime NodeType: type, node: ?*NodeType) !void {
+    pub fn printPreOrderRecursive(writer: *std.Io.Writer, comptime NodeType: type, node: ?*NodeType) !void {
         validNode(NodeType);
 
         if (node) |n| {
@@ -42,6 +42,61 @@ pub const DepthsFirstSearch = struct {
             try printPostOrderRecursive(writer, NodeType, n.right);
             // visit
             try printValue(writer, NodeType, n);
+        }
+    }
+
+    pub fn printPreOrderIterative(allocator: std.mem.Allocator, writer: *std.Io.Writer, comptime NodeType: type, node: ?*NodeType) !void {
+        validNode(NodeType);
+
+        if (node == null) return;
+
+        var stack = try Stack(*NodeType).init(allocator);
+        defer stack.deinit();
+
+        try stack.push(node.?);
+
+        while (stack.getSize() > 0) {
+            const current = stack.pop() orelse unreachable;
+            // visit
+            try printValue(writer, NodeType, current);
+
+            // right first so left is ontop of the stack
+            if (current.right) |right| {
+                try stack.push(right);
+            }
+
+            if (current.left) |left| {
+                try stack.push(left);
+            }
+        }
+    }
+
+    pub fn printInOrderIterative(allocator: std.mem.Allocator, writer: *std.Io.Writer, comptime NodeType: type, node: ?*NodeType) !void {
+        validNode(NodeType);
+
+        if (node == null) return;
+
+        var stack = try Stack(*NodeType).init(allocator);
+        defer stack.deinit();
+
+        var current = node;
+
+        // go left
+        while (current != null or stack.getSize() > 0) {
+
+            // far left as possible
+            while (current) |curr| {
+                try stack.push(curr);
+                current = curr.left;
+            }
+
+            // visit
+            current = stack.pop();
+            if (current) |curr| {
+                try printValue(writer, NodeType, curr);
+                // go right
+                current = curr.right;
+            }
         }
     }
 

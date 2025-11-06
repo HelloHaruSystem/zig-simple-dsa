@@ -259,3 +259,32 @@ test "printPreOrderIterative basic functionality" {
 
     try testing.expectEqualStrings(expected, output);
 }
+
+test "printInOrderIterative basic functionality" {
+    const allocator = testing.allocator;
+    var bst = Bst(f128).init(allocator);
+    defer bst.deinit();
+
+    try bst.insertIterative(527.25);
+    try bst.insertIterative(5000.0);
+    try bst.insertIterative(39.95);
+    try bst.insertRecursively(5000.1);
+    try bst.insertRecursively(5000.01);
+    try bst.insertIterative(4999.99);
+    try bst.insertRecursively(45.99);
+    try bst.insertIterative(75.0);
+    try bst.insertRecursively(67);
+    try bst.insertIterative(12.50);
+
+    var buffer: [1024]u8 = undefined;
+    var writer: std.Io.Writer = .fixed(&buffer);
+
+    try DepthsFirstSearch.printInOrderIterative(allocator, &writer, Bst(f128).Node, bst.root);
+
+    const output = buffer[0..writer.end];
+
+    // Pre-order: 12.50, 39.95, 45.99, 67, 75.0, 527.25, 4999.99, 5000.0, 5000.01, 5000.1
+    const expected = "12.5\n39.95\n45.99\n67\n75\n527.25\n4999.99\n5000\n5000.01\n5000.1\n";
+
+    try testing.expectEqualStrings(expected, output);
+}

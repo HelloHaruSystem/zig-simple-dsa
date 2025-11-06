@@ -27,5 +27,5 @@ pub fn main() !void {
     try bst.insertRecursively(16);
 
     // should print 4 -> 16 -> 8
-    try tree_algos.DepthsFirstSearch.printPostOrderRecursive(stdout, dsa.trees.BinarySearchTree(i32).Node, bst.root);
+    try tree_algos.DepthFirstSearch.printPostOrderRecursive(stdout, dsa.trees.BinarySearchTree(i32).Node, bst.root);
 }

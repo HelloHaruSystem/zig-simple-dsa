@@ -3,8 +3,10 @@ const Stack = @import("../data_structures/stacks/stack.zig").Stack;
 const Bst = @import("../data_structures/trees/binary_search_tree.zig").BinarySearchTree;
 const testing = std.testing;
 
-// Depth first searchers
-pub const DepthsFirstSearch = struct {
+/// A collection of Depth First Search algorithms for binary trees
+/// Contains both recursive and iterative versions of the methods
+pub const DepthFirstSearch = struct {
+    /// Prints out the values of the tree Pre-order using recursion
     pub fn printPreOrderRecursive(writer: *std.Io.Writer, comptime NodeType: type, node: ?*NodeType) !void {
         validNode(NodeType);
 
@@ -18,6 +20,7 @@ pub const DepthsFirstSearch = struct {
         }
     }
 
+    /// Prints out the values of the tree In-order using recursion
     pub fn printInOrderRecursive(writer: *std.Io.Writer, comptime NodeType: type, node: ?*NodeType) !void {
         validNode(NodeType);
 
@@ -31,9 +34,7 @@ pub const DepthsFirstSearch = struct {
         }
     }
 
-    // post-order
-    // works for all binary trees using comptime duck typing
-    // (all binary trees should have a left and right)
+    /// Prints out the values of the tree Post-order using recursion
     pub fn printPostOrderRecursive(writer: *std.Io.Writer, comptime NodeType: type, node: ?*NodeType) !void {
         validNode(NodeType);
 
@@ -47,6 +48,7 @@ pub const DepthsFirstSearch = struct {
         }
     }
 
+    /// Prints out the values of the tree Pre-order iteratively
     pub fn printPreOrderIterative(allocator: std.mem.Allocator, writer: *std.Io.Writer, comptime NodeType: type, node: ?*NodeType) !void {
         validNode(NodeType);
 
@@ -73,6 +75,7 @@ pub const DepthsFirstSearch = struct {
         }
     }
 
+    /// Prints out the values of the tree In-order iteratively
     pub fn printInOrderIterative(allocator: std.mem.Allocator, writer: *std.Io.Writer, comptime NodeType: type, node: ?*NodeType) !void {
         validNode(NodeType);
 
@@ -102,6 +105,7 @@ pub const DepthsFirstSearch = struct {
         }
     }
 
+    /// Prints out the values of the tree Post-order iteratively
     pub fn printPostOrderIterative(allocator: std.mem.Allocator, writer: *std.Io.Writer, comptime NodeType: type, node: ?*NodeType) !void {
         validNode(NodeType);
 
@@ -136,6 +140,10 @@ pub const DepthsFirstSearch = struct {
     }
 
     // helper functions
+
+    /// Helper function to validate the node type
+    /// These functions only works on binary trees
+    /// So this functions job is to make sure it has a left and right property
     fn validNode(comptime NodeType: type) void {
         // TODO: Implement proper error unions to use here
         if (!@hasField(NodeType, "value")) {
@@ -149,6 +157,7 @@ pub const DepthsFirstSearch = struct {
         }
     }
 
+    /// Helper function to print the value that a node holds
     fn printValue(writer: *std.Io.Writer, comptime NodeType: type, node: *NodeType) !void {
         try writer.print("{any}\n", .{node.value});
         try writer.flush();
@@ -171,7 +180,7 @@ test "printPreOrderRecursive basic functionality" {
     var buffer: [1024]u8 = undefined;
     var writer: std.Io.Writer = .fixed(&buffer);
 
-    try DepthsFirstSearch.printPreOrderRecursive(&writer, Bst(i32).Node, bst.root);
+    try DepthFirstSearch.printPreOrderRecursive(&writer, Bst(i32).Node, bst.root);
 
     const output = buffer[0..writer.end];
 
@@ -196,7 +205,7 @@ test "printInOrderRecursive basic functionality" {
     var buffer: [1024]u8 = undefined;
     var writer: std.Io.Writer = .fixed(&buffer);
 
-    try DepthsFirstSearch.printInOrderRecursive(&writer, Bst(i32).Node, bst.root);
+    try DepthFirstSearch.printInOrderRecursive(&writer, Bst(i32).Node, bst.root);
 
     const output = buffer[0..writer.end];
 
@@ -221,7 +230,7 @@ test "printPostOrderRecursive basic functionality" {
     var buffer: [1024]u8 = undefined;
     var writer: std.Io.Writer = .fixed(&buffer);
 
-    try DepthsFirstSearch.printPostOrderRecursive(&writer, Bst(i32).Node, bst.root);
+    try DepthFirstSearch.printPostOrderRecursive(&writer, Bst(i32).Node, bst.root);
 
     const output = buffer[0..writer.end];
 
@@ -250,7 +259,7 @@ test "printPreOrderIterative basic functionality" {
     var buffer: [1024]u8 = undefined;
     var writer: std.Io.Writer = .fixed(&buffer);
 
-    try DepthsFirstSearch.printPreOrderIterative(allocator, &writer, Bst(f128).Node, bst.root);
+    try DepthFirstSearch.printPreOrderIterative(allocator, &writer, Bst(f128).Node, bst.root);
 
     const output = buffer[0..writer.end];
 
@@ -279,7 +288,7 @@ test "printInOrderIterative basic functionality" {
     var buffer: [1024]u8 = undefined;
     var writer: std.Io.Writer = .fixed(&buffer);
 
-    try DepthsFirstSearch.printInOrderIterative(allocator, &writer, Bst(f128).Node, bst.root);
+    try DepthFirstSearch.printInOrderIterative(allocator, &writer, Bst(f128).Node, bst.root);
 
     const output = buffer[0..writer.end];
 
@@ -308,7 +317,7 @@ test "printPostOrderIterative basic functionality" {
     var buffer: [1024]u8 = undefined;
     var writer: std.Io.Writer = .fixed(&buffer);
 
-    try DepthsFirstSearch.printPostOrderIterative(allocator, &writer, Bst(f128).Node, bst.root);
+    try DepthFirstSearch.printPostOrderIterative(allocator, &writer, Bst(f128).Node, bst.root);
 
     const output = buffer[0..writer.end];
 

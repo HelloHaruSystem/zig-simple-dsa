@@ -39,7 +39,7 @@ pub fn BinarySearchTree(comptime T: type) type {
         // TODO: Implement:
         // make a generic post-order function to handle the traversal logic
         pub fn deinit(self: *Self) void {
-            _ = self;
+            self.freeSubTree(self.root);
         }
 
         pub fn insertIterative(self: *Self, value: T) !void {
@@ -48,7 +48,7 @@ pub fn BinarySearchTree(comptime T: type) type {
                 return;
             }
 
-            var current = self.root.*;
+            var current = self.root;
             // while current is not null
             while (current) |node| {
                 // if less than current
@@ -101,6 +101,16 @@ pub fn BinarySearchTree(comptime T: type) type {
             const new_node = try self.allocator.create(Node);
             new_node.* = Node.init(value);
             return new_node;
+        }
+
+        // free and destroy a subtree starting from the give note
+        // this method uses Post-order
+        fn freeSubTree(self: *Self, node: ?*Node) void {
+            if (node) |n| {
+                self.freeSubTree(n.left);
+                self.freeSubTree(n.right);
+                self.allocator.destroy(n);
+            }
         }
     };
 }

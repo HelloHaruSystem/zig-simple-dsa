@@ -1,6 +1,7 @@
 const std = @import("std");
 const testing = std.testing;
 
+/// Binary Search Tree data structure (unbalanced).
 pub fn BinarySearchTree(comptime T: type) type {
     return struct {
         const Self = @This();
@@ -10,10 +11,14 @@ pub fn BinarySearchTree(comptime T: type) type {
             const This = @This();
 
             // node fields
+            /// The value that the node holds
             value: T,
+            /// The Nodes left child (can be null)
             left: ?*Node,
+            /// The nodes right child (can be null)
             right: ?*Node,
 
+            /// Initializes a new node with the given value
             pub fn init(value: T) This {
                 return This{
                     .value = value,
@@ -24,10 +29,16 @@ pub fn BinarySearchTree(comptime T: type) type {
         };
 
         // BST fields
+        /// The allocator used to allocate the memory needed by the Binary Search Tree
         allocator: std.mem.Allocator,
+        /// The root node of the Binary Search Tree
+        /// This is null when just initialized or empty
         root: ?*Node,
+        /// This size of the Binary Search Tree
+        /// This field is equal to the number of values inserted into the tree
         size: usize,
 
+        /// Initializes an empty Binary Search Tree
         pub fn init(allocator: std.mem.Allocator) Self {
             return Self{
                 .allocator = allocator,
@@ -36,12 +47,14 @@ pub fn BinarySearchTree(comptime T: type) type {
             };
         }
 
-        // TODO: Implement:
-        // make a generic post-order function to handle the traversal logic
+        /// Frees the memory used by the Binary Search Tree
         pub fn deinit(self: *Self) void {
             self.freeSubTree(self.root);
         }
 
+        /// Inserts a value into the Binary Search Tree
+        /// Time complexity worst case O(n)
+        /// Time complexity average case O(log n)
         pub fn insertIterative(self: *Self, value: T) !void {
             if (self.root == null) {
                 self.root = try self.createNode(value);
@@ -71,11 +84,20 @@ pub fn BinarySearchTree(comptime T: type) type {
             }
         }
 
+        /// Inserts a value into the Binary Search Tree
+        /// Using recursion
+        /// Time complexity worst case O(n)
+        /// Time complexity average case O(log n)
         pub fn insertRecursively(self: *Self, value: T) !void {
             self.root = try self.insertRecursivelyHelper(self.root, value);
         }
 
-        pub fn insertRecursivelyHelper(self: *Self, node: ?*Node, value: T) !?*Node {
+        // TODO: implement getMax(), getMin() and contains
+
+        // Helper functions
+
+        /// Internal Recursive helper function for inserts
+        fn insertRecursivelyHelper(self: *Self, node: ?*Node, value: T) !?*Node {
             // base case
             if (node == null) {
                 return try self.createNode(value);
@@ -94,17 +116,17 @@ pub fn BinarySearchTree(comptime T: type) type {
             return node;
         }
 
-        // TODO: implement getMax(), getMin() and contains
-
-        // Helper functions
+        /// Internal method used by the BInary Search Tree to create a new node
+        /// This is used when inserting into the tree
         fn createNode(self: *Self, value: T) !*Node {
             const new_node = try self.allocator.create(Node);
             new_node.* = Node.init(value);
             return new_node;
         }
 
-        // free and destroy a subtree starting from the give note
-        // this method uses Post-order
+        /// Internal method for freeing memory used by the Binary Search Tree
+        /// This is used by the deinit method
+        /// THis is a recursive method that uses Post-order for traversal
         fn freeSubTree(self: *Self, node: ?*Node) void {
             if (node) |n| {
                 self.freeSubTree(n.left);

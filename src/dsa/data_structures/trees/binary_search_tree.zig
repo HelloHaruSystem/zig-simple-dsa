@@ -97,13 +97,30 @@ pub fn BinarySearchTree(comptime T: type) type {
 
         /// Returns the current size of the Binary Search Tree
         /// The size represents the number of entries
-        pub fn getSize(self: *Self) usize {
+        pub fn getSize(self: *const Self) usize {
             return self.size;
         }
 
         /// Returns true if the Binary Search tree is empty
-        pub fn isEmpty(self: *Self) bool {
+        pub fn isEmpty(self: *const Self) bool {
             return self.size == 0;
+        }
+
+        /// Returns the highest value in the Binary Search Tree
+        /// If the tree is empty return null
+        /// time complexity O(h) where h is the height of the tree
+        pub fn getMax(self: *const Self) ?T {
+            if (self.isEmpty()) return null;
+
+            // Since we checked already if the bst is empty we can unwrap the root
+            var current = self.root.?;
+
+            // Only visit right pointers since we are looking for the highest value in the binary search tree
+            while (current.right) |right_node| {
+                current = right_node;
+            }
+
+            return current.value;
         }
 
         // TODO: implement getMax(), getMin() and contains

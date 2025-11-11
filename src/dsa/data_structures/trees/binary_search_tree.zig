@@ -82,6 +82,8 @@ pub fn BinarySearchTree(comptime T: type) type {
                     }
                 }
             }
+
+            self.size += 1;
         }
 
         /// Inserts a value into the Binary Search Tree
@@ -90,6 +92,18 @@ pub fn BinarySearchTree(comptime T: type) type {
         /// Time complexity average case O(log n)
         pub fn insertRecursively(self: *Self, value: T) !void {
             self.root = try self.insertRecursivelyHelper(self.root, value);
+            self.size += 1;
+        }
+
+        /// Returns the current size of the Binary Search Tree
+        /// The size represents the number of entries
+        pub fn getSize(self: *Self) usize {
+            return self.size;
+        }
+
+        /// Returns true if the Binary Search tree is empty
+        pub fn isEmpty(self: *Self) bool {
+            return self.size == 0;
         }
 
         // TODO: implement getMax(), getMin() and contains
@@ -135,4 +149,11 @@ pub fn BinarySearchTree(comptime T: type) type {
             }
         }
     };
+}
+
+// tests
+test "Binary Search Tree init method initializes a new empty binary search tree" {
+    const allocator = testing.allocator;
+    var bst = BinarySearchTree(i32).init(allocator);
+    defer bst.deinit();
 }

@@ -123,7 +123,24 @@ pub fn BinarySearchTree(comptime T: type) type {
             return current.value;
         }
 
-        // TODO: implement getMax(), getMin() and contains
+        /// Returns the lowest value in the Binary Search Tree
+        /// If the tree is empty return null
+        /// Time complexity O(h) where h is the height of the tree
+        pub fn getMin(self: *const Self) ?T {
+            if (self.isEmpty()) return null;
+
+            // since we checked already if the bst is empty we can unwrap the root
+            var current = self.root.?;
+
+            // Only visit left pointers since we are looking for the lowest value in the binary search tree
+            while (current.left) |left_node| {
+                current = left_node;
+            }
+
+            return current.value;
+        }
+
+        // TODO: implement contains()
 
         // Helper functions
 

@@ -140,10 +140,31 @@ pub fn BinarySearchTree(comptime T: type) type {
             return current.value;
         }
 
-        // TODO: implement contains()
+        /// Returns true if Binary Search Tree contains the given value otherwise false
+        /// Time complexity O(h) where h is the height of the tree
+        pub fn contains(self: *const Self, value: T) bool {
+            if (self.isEmpty()) return false;
+
+            var current = self.root;
+
+            while (current) |node| {
+                const current_value = node.value;
+
+                if (current_value == value) {
+                    return true;
+                }
+
+                if (value < current_value) {
+                    current = node.left;
+                } else {
+                    current = node.right;
+                }
+            }
+
+            return false;
+        }
 
         // Helper functions
-
         /// Internal Recursive helper function for inserts
         fn insertRecursivelyHelper(self: *Self, node: ?*Node, value: T) !?*Node {
             // base case

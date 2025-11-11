@@ -156,4 +156,18 @@ test "Binary Search Tree init method initializes a new empty binary search tree"
     const allocator = testing.allocator;
     var bst = BinarySearchTree(i32).init(allocator);
     defer bst.deinit();
+
+    try testing.expect(bst.isEmpty());
+    try testing.expect(bst.getSize() == 0);
+}
+
+test "Binary Seatch Tree deinit cleans up memory properly" {
+    const allocator = testing.allocator;
+    var bst = BinarySearchTree(f128).init(allocator);
+
+    try bst.insertIterative(34567.9876);
+    try bst.insertRecursively(9876.345);
+
+    bst.deinit();
+    // If there is a momory leak the testing allocator will fail this test
 }

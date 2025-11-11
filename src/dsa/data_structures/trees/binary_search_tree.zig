@@ -1,7 +1,8 @@
 const std = @import("std");
 const testing = std.testing;
 
-/// Binary Search Tree data structure (unbalanced).
+/// Binary Search Tree data structure
+/// This is a strict (no duplicates) and unbalanced Binary Search Tree
 pub fn BinarySearchTree(comptime T: type) type {
     return struct {
         const Self = @This();
@@ -68,22 +69,25 @@ pub fn BinarySearchTree(comptime T: type) type {
                 if (value < node.value) {
                     if (node.left == null) {
                         node.left = try self.createNode(value);
+                        self.size += 1;
                         return;
                     } else {
                         current = node.left;
                     }
-                } else {
+                } else if (value > node.value) {
                     // if higher than current
                     if (node.right == null) {
                         node.right = try self.createNode(value);
+                        self.size += 1;
                         return;
                     } else {
                         current = node.right;
                     }
+                } else {
+                    // no duplicate
+                    return;
                 }
             }
-
-            self.size += 1;
         }
 
         /// Inserts a value into the Binary Search Tree
@@ -92,7 +96,6 @@ pub fn BinarySearchTree(comptime T: type) type {
         /// Time complexity average case O(log n)
         pub fn insertRecursively(self: *Self, value: T) !void {
             self.root = try self.insertRecursivelyHelper(self.root, value);
-            self.size += 1;
         }
 
         /// Returns the current size of the Binary Search Tree
@@ -169,7 +172,9 @@ pub fn BinarySearchTree(comptime T: type) type {
         fn insertRecursivelyHelper(self: *Self, node: ?*Node, value: T) !?*Node {
             // base case
             if (node == null) {
-                return try self.createNode(value);
+                const new_node = try self.createNode(value);
+                self.size += 1;
+                return try new_node;
             }
 
             // unwrap
@@ -178,8 +183,10 @@ pub fn BinarySearchTree(comptime T: type) type {
             // recursive step
             if (value < current_node.value) {
                 current_node.left = try self.insertRecursivelyHelper(current_node.left, value);
-            } else {
+            } else if (value > current_node.value) {
                 current_node.right = try self.insertRecursivelyHelper(current_node.right, value);
+            } else {
+                return current_node;
             }
 
             return node;

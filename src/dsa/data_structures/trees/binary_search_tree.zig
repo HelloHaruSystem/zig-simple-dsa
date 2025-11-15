@@ -95,7 +95,12 @@ pub fn BinarySearchTree(comptime T: type) type {
         /// Time complexity worst case O(n)
         /// Time complexity average case O(log n)
         pub fn insertRecursively(self: *Self, value: T) !void {
-            if (self.isEmpty()) return;
+            if (self.isEmpty()) {
+                self.root = try self.createNode(value);
+                self.size += 1;
+                return;
+            }
+
             self.root = try self.insertRecursivelyHelper(self.root, value);
         }
 
@@ -264,7 +269,7 @@ pub fn BinarySearchTree(comptime T: type) type {
             if (node == null) {
                 const new_node = try self.createNode(value);
                 self.size += 1;
-                return try new_node;
+                return new_node;
             }
 
             // unwrap
@@ -335,7 +340,7 @@ pub fn BinarySearchTree(comptime T: type) type {
             return node;
         }
 
-        /// Helper functio to find minium value in a sbutree starting from the given node
+        /// Helper function to find minium value in a sbutree starting from the given node
         fn getMinFromNode(self: *const Self, start_node: ?*Node) ?T {
             _ = self;
             if (start_node == null) return null;

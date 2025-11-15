@@ -103,59 +103,6 @@ pub fn BinarySearchTree(comptime T: type) type {
             self.root = self.deleteRecursiveHelper(self.root, value);
         }
 
-        fn deleteRecursiveHelper(self: *Self, node: ?*Node, value: T) ?*Node {
-            // base case
-            if (node == null) return null;
-
-            // Safe to unwrap node because of the null check above
-            const current_node = node.?;
-
-            // search step
-            if (value < current_node.value) {
-                // go left
-                current_node.left = self.deleteRecursiveHelper(current_node.left, value);
-            } else if (value > current_node.value) {
-                current_node.right = self.deleteRecursiveHelper(current_node.right, value);
-            } else {
-                // Node found
-
-                // only right child
-                if (current_node.left == null) {
-                    const replacement = current_node.right;
-                    self.allocator.destroy(current_node);
-                    self.size -= 1;
-                    return replacement;
-                }
-
-                // only left child
-                if (current_node.right == null) {
-                    const replacement = current_node.left;
-                    self.allocator.destroy(current_node);
-                    self.size -= 1;
-                    return replacement;
-                }
-
-                // two children
-                const successsor_value = self.getMin(current_node.right);
-
-                // copy the successors value to the current node
-                if (successsor_value) |s_value| {
-                    current_node.value = s_value;
-
-                    // Recursivly delete the successor node from the subtree (doesn't have two children)
-                    current_node.right = self.deleteRecursiveHelper(current_node.right, s_value);
-                } else {
-                    // should be unreachable
-                    unreachable;
-                }
-            }
-
-            // This returns the current node's pointer up the stack
-            // when no deletion happened at this level (search step)
-            // or when the node was a two-child deletion (Case 3)
-            return node;
-        }
-
         /// Returns the current size of the Binary Search Tree
         /// The size represents the number of entries
         pub fn getSize(self: *const Self) usize {
@@ -247,6 +194,59 @@ pub fn BinarySearchTree(comptime T: type) type {
                 return current_node;
             }
 
+            return node;
+        }
+
+        fn deleteRecursiveHelper(self: *Self, node: ?*Node, value: T) ?*Node {
+            // base case
+            if (node == null) return null;
+
+            // Safe to unwrap node because of the null check above
+            const current_node = node.?;
+
+            // search step
+            if (value < current_node.value) {
+                // go left
+                current_node.left = self.deleteRecursiveHelper(current_node.left, value);
+            } else if (value > current_node.value) {
+                current_node.right = self.deleteRecursiveHelper(current_node.right, value);
+            } else {
+                // Node found
+
+                // only right child
+                if (current_node.left == null) {
+                    const replacement = current_node.right;
+                    self.allocator.destroy(current_node);
+                    self.size -= 1;
+                    return replacement;
+                }
+
+                // only left child
+                if (current_node.right == null) {
+                    const replacement = current_node.left;
+                    self.allocator.destroy(current_node);
+                    self.size -= 1;
+                    return replacement;
+                }
+
+                // two children
+                const successsor_value = self.getMin(current_node.right);
+
+                // copy the successors value to the current node
+                if (successsor_value) |s_value| {
+                    current_node.value = s_value;
+
+                    // Recursivly delete the successor node from the subtree (doesn't have two children)
+                    current_node.right = self.deleteRecursiveHelper(current_node.right, s_value);
+                } else {
+                    // should be unreachable
+                    unreachable;
+                }
+            }
+
+            // This returns the current node's pointer up the stack
+            // when no deletion happened at this level (search step)
+            // or when the node was a two-child deletion (Case 3)
             return node;
         }
 

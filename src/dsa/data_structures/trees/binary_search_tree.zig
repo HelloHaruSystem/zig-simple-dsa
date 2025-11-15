@@ -340,7 +340,7 @@ pub fn BinarySearchTree(comptime T: type) type {
             return node;
         }
 
-        /// Helper function to find minium value in a sbutree starting from the given node
+        /// Helper function to find minimum value in a subtree starting from the given node
         fn getMinFromNode(self: *const Self, start_node: ?*Node) ?T {
             _ = self;
             if (start_node == null) return null;
@@ -393,5 +393,5 @@ test "Binary Seatch Tree deinit cleans up memory properly" {
     try bst.insertRecursively(9876.345);
 
     bst.deinit();
-    // If there is a momory leak the testing allocator will fail this test
+    // If there is a memory leak the testing allocator will fail this test
 }

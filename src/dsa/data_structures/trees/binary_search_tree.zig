@@ -99,6 +99,91 @@ pub fn BinarySearchTree(comptime T: type) type {
             self.root = try self.insertRecursivelyHelper(self.root, value);
         }
 
+        pub fn deleteIterative(self: *Self, value: T) void {
+            if (self.root == null) return;
+
+            var parent: ?*Node = null;
+            // Safe to unwrap node because of the null check at the start
+            var current = self.root;
+            var is_left_child = false;
+
+            // search step
+            while (current) |current_node| {
+                if (value < current_node.value) {
+                    // go left
+                    parent = current_node;
+                    current = current_node.left;
+                    is_left_child = true;
+                } else if (value > current_node.value) {
+                    // go right
+                    parent = current_node;
+                    current = current_node.right;
+                    is_left_child = false;
+                } else {
+                    // node found
+
+                    // only right child
+                    if (current_node.left == null) {
+                        const replacement = current_node.right;
+
+                        if (parent == null) {
+                            // delete root
+                            self.root = replacement;
+                        } else if (is_left_child) {
+                            parent.?.left = replacement;
+                        } else {
+                            parent.?.right = replacement;
+                        }
+
+                        self.allocator.destroy(current_node);
+                        self.size -= 1;
+                        return;
+                    }
+
+                    // only left child
+                    if (current_node.right == null) {
+                        const replacement = current_node.left;
+
+                        if (parent == null) {
+                            // delete root
+                            self.root = replacement;
+                        } else if (is_left_child) {
+                            parent.?.left = replacement;
+                        } else {
+                            parent.?.right = replacement;
+                        }
+
+                        self.allocator.destroy(current_node);
+                        self.size -= 1;
+                        return;
+                    }
+
+                    // two children
+                    var successor_parent: *Node = current_node;
+                    var successor = current_node.right.?;
+
+                    while (successor.left) |left_node| {
+                        successor_parent = successor;
+                        successor = left_node;
+                    }
+
+                    // copy successor value to current node
+                    current_node.value = successor.value;
+
+                    // delete the successor node
+                    if (successor_parent == current_node) {
+                        // successor is the direct right child
+                        successor_parent.right = successor.right;
+                    } else {
+                        successor_parent.left = successor.right;
+                    }
+
+                    self.allocator.destroy(successor);
+                    self.size -= 1;
+                }
+            }
+        }
+
         pub fn deleteRecursive(self: *Self, value: T) void {
             self.root = self.deleteRecursiveHelper(self.root, value);
         }
@@ -230,7 +315,7 @@ pub fn BinarySearchTree(comptime T: type) type {
                 }
 
                 // two children
-                const successsor_value = self.getMin(current_node.right);
+                const successsor_value = self.getMinFromNode(current_node.right);
 
                 // copy the successors value to the current node
                 if (successsor_value) |s_value| {
@@ -248,6 +333,20 @@ pub fn BinarySearchTree(comptime T: type) type {
             // when no deletion happened at this level (search step)
             // or when the node was a two-child deletion (Case 3)
             return node;
+        }
+
+        /// Helper functio to find minium value in a sbutree starting from the given node
+        fn getMinFromNode(self: *const Self, start_node: ?*Node) ?T {
+            _ = self;
+            if (start_node == null) return null;
+
+            var current = start_node.?;
+
+            while (current.left) |left_node| {
+                current = left_node;
+            }
+
+            return current.value;
         }
 
         /// Internal method used by the BInary Search Tree to create a new node

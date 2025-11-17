@@ -104,6 +104,7 @@ pub fn BinarySearchTree(comptime T: type) type {
             self.root = try self.insertRecursivelyHelper(self.root, value);
         }
 
+        /// Deletes a value from the binary search tree
         pub fn deleteIterative(self: *Self, value: T) void {
             if (self.root == null) return;
 
@@ -189,6 +190,8 @@ pub fn BinarySearchTree(comptime T: type) type {
             }
         }
 
+        /// Deletes a value from the binary search tree
+        /// Using recursion
         pub fn deleteRecursive(self: *Self, value: T) void {
             self.root = self.deleteRecursiveHelper(self.root, value);
         }
@@ -287,6 +290,7 @@ pub fn BinarySearchTree(comptime T: type) type {
             return node;
         }
 
+        /// Internal recursive helper function for deletions in the binary search tree
         fn deleteRecursiveHelper(self: *Self, node: ?*Node, value: T) ?*Node {
             // base case
             if (node == null) return null;

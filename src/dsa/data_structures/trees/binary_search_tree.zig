@@ -1,4 +1,5 @@
 const std = @import("std");
+const tree_algos = @import("../../algorithms/tree_algorithms.zig").DepthFirstSearch;
 const testing = std.testing;
 
 /// Binary Search Tree data structure
@@ -59,6 +60,7 @@ pub fn BinarySearchTree(comptime T: type) type {
         pub fn insertIterative(self: *Self, value: T) !void {
             if (self.root == null) {
                 self.root = try self.createNode(value);
+                self.size += 1;
                 return;
             }
 
@@ -398,4 +400,29 @@ test "Binary Seatch Tree deinit cleans up memory properly" {
 
     bst.deinit();
     // If there is a memory leak the testing allocator will fail this test
+}
+
+test "insertIterative basic functionality" {
+    const allocator = testing.allocator;
+    var bst = BinarySearchTree(u8).init(allocator);
+    defer bst.deinit();
+
+    try bst.insertIterative(8);
+    try bst.insertIterative(64);
+    try bst.insertIterative(128);
+    try bst.insertIterative(32);
+    try bst.insertIterative(4);
+    try bst.insertIterative(128);
+
+    var buffer: [512]u8 = undefined;
+    var writer: std.Io.Writer = .fixed(&buffer);
+    try tree_algos.printPreOrderRecursive(&writer, BinarySearchTree(u8).Node, bst.root);
+    const output = buffer[0..writer.end];
+    // pre order 8, 4, 64, 32, 128
+    const expected = "8\n4\n64\n32\n128\n";
+
+    try testing.expectEqualStrings(expected, output);
+    try testing.expect(bst.getSize() == 5);
+    try testing.expect(!bst.isEmpty());
+    try testing.expect(bst.contains(32));
 }

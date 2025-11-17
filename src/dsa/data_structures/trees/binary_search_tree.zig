@@ -521,6 +521,52 @@ test "deleteRecursive basic functionality" {
     try testing.expect(bst.isEmpty());
 }
 
+test "getSize basic functionality" {
+    const allocator = testing.allocator;
+    var bst = BinarySearchTree(u8).init(allocator);
+    defer bst.deinit();
+
+    try bst.insertRecursively(127);
+    try bst.insertIterative(1);
+    try bst.insertRecursively(72);
+
+    const size_pre_delete = bst.getSize();
+
+    bst.deleteIterative(127);
+    bst.deleteRecursive(72);
+
+    const size_post_delete = bst.getSize();
+
+    bst.deleteIterative(1);
+
+    const is_empty = bst.getSize() == 0;
+
+    try testing.expectEqual(size_pre_delete, 3);
+    try testing.expectEqual(size_post_delete, 1);
+    try testing.expect(is_empty);
+}
+
+test "isEmpty basic functionality" {
+    const allocator = testing.allocator;
+    var bst = BinarySearchTree(usize).init(allocator);
+    defer bst.deinit();
+
+    for (0..100) |i| {
+        try bst.insertRecursively(i);
+    }
+
+    const is_empty_pre_delete = bst.isEmpty();
+
+    for (0..bst.getSize()) |i| {
+        bst.deleteRecursive(i);
+    }
+
+    const is_empty_post_delete = bst.isEmpty();
+
+    try testing.expectEqual(false, is_empty_pre_delete);
+    try testing.expectEqual(true, is_empty_post_delete);
+}
+
 test "getMax basic functionality" {
     const allocator = testing.allocator;
     var bst = BinarySearchTree(f64).init(allocator);
@@ -586,4 +632,20 @@ test "getMin returns null when called on empty tree" {
     defer bst.deinit();
 
     try testing.expectEqual(null, bst.getMin());
+}
+
+test "contains basic functionality" {
+    const allocator = testing.allocator;
+    var bst = BinarySearchTree(usize).init(allocator);
+    defer bst.deinit();
+
+    for (0..3) |i| {
+        try bst.insertRecursively(i);
+    }
+
+    for (0..bst.getSize()) |i| {
+        try testing.expect(bst.contains(i));
+    }
+
+    try testing.expect(!bst.contains(69));
 }

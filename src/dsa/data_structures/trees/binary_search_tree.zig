@@ -501,6 +501,39 @@ test "deleteIterative basic functionality" {
     try testing.expect(bst.isEmpty());
 }
 
+test "deleteIterative two children case" {
+    const allocator = testing.allocator;
+    var bst = BinarySearchTree(i32).init(allocator);
+    defer bst.deinit();
+
+    try bst.insertIterative(50);
+    try bst.insertIterative(25);
+    try bst.insertIterative(75);
+    try bst.insertIterative(10);
+    try bst.insertIterative(35);
+    try bst.insertIterative(60); // In-order Successor of 50
+    try bst.insertIterative(90);
+
+    const original_size = bst.getSize();
+    try testing.expectEqual(7, original_size);
+
+    // Delete the root (50) which has two children. Successor is 60.
+    bst.deleteIterative(50);
+
+    // In-Order 10, 25, 35, 60, 75, 90
+    var buffer: [512]u8 = undefined;
+    var writer: std.Io.Writer = .fixed(&buffer);
+
+    try tree_algos.printInOrderRecursive(&writer, BinarySearchTree(i32).Node, bst.root);
+    const output = buffer[0..writer.end];
+    const expected = "10\n25\n35\n60\n75\n90\n";
+
+    try testing.expect(bst.getSize() == 6);
+    try testing.expect(!bst.contains(50));
+    try testing.expect(bst.contains(60)); // Successor must still be present
+    try testing.expectEqualStrings(expected, output);
+}
+
 test "deleteRecursive basic functionality" {
     const allocator = testing.allocator;
     var bst = BinarySearchTree(f128).init(allocator);
@@ -511,8 +544,8 @@ test "deleteRecursive basic functionality" {
 
     const original_size = bst.getSize();
 
-    bst.deleteIterative(98765.1234);
-    bst.deleteIterative(-123456.9876);
+    bst.deleteRecursive(98765.1234);
+    bst.deleteRecursive(-123456.9876);
 
     try testing.expect(bst.getSize() != original_size);
     try testing.expect(bst.getSize() == 0);

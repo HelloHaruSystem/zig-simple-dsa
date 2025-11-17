@@ -14,13 +14,13 @@ Practicing data structures and algorithms while getting comfortable with Zig syn
 - [x] Ring Buffer
 - [x] Stacks & Queues
 - [x] Hash Map
-- [x] Binary Trees (Still neeeds a few tests)
+- [x] Binary Trees
 - [ ] Heaps
 
 **Algorithms**
 - [x] Linear & Binary Search
 - [ ] Sorting (Bubble, Merge, Quick)
-- [x] Tree Traversals (DFS, BFS)
+- [ ] Tree Traversals (DFS, BFS) (only missing BFS)
 - [ ] Basic Dynamic Programming
 
 ## Build the project

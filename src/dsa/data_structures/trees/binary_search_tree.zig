@@ -520,3 +520,70 @@ test "deleteRecursive basic functionality" {
     try testing.expect(!bst.contains(-123456.9876));
     try testing.expect(bst.isEmpty());
 }
+
+test "getMax basic functionality" {
+    const allocator = testing.allocator;
+    var bst = BinarySearchTree(f64).init(allocator);
+    defer bst.deinit();
+
+    try bst.insertIterative(527.25);
+    try bst.insertIterative(5000.0);
+    try bst.insertIterative(39.95);
+    try bst.insertRecursively(5000.1);
+    try bst.insertRecursively(5000.01);
+    try bst.insertIterative(4999.99);
+    try bst.insertRecursively(45.99);
+    try bst.insertIterative(75.0);
+    try bst.insertRecursively(67);
+    try bst.insertIterative(12.50);
+
+    const expected_max_pre_delete = bst.getMax();
+
+    bst.deleteRecursive(5000.1);
+    bst.deleteRecursive(5000.01);
+    bst.deleteRecursive(5000.0);
+    bst.deleteRecursive(4999.99);
+
+    const epxected_max_post_delete = bst.getMax();
+
+    try testing.expectEqual(5000.1, expected_max_pre_delete.?);
+    try testing.expectEqual(527.25, epxected_max_post_delete.?);
+}
+
+test "getMax returns null when called on empty tree" {
+    const allocator = testing.allocator;
+    var bst = BinarySearchTree(i128).init(allocator);
+    defer bst.deinit();
+
+    try testing.expectEqual(null, bst.getMax());
+}
+
+test "getMin basic functionality" {
+    const allocator = testing.allocator;
+    var bst = BinarySearchTree(f32).init(allocator);
+    defer bst.deinit();
+
+    try bst.insertRecursively(45.99);
+    try bst.insertIterative(75.0);
+    try bst.insertRecursively(67);
+    try bst.insertIterative(12.50);
+
+    const expected_max_pre_delete = bst.getMin();
+
+    bst.deleteIterative(12.50);
+    bst.deleteRecursive(45.99);
+    bst.deleteIterative(67);
+
+    const epxected_max_post_delete = bst.getMin();
+
+    try testing.expectEqual(12.50, expected_max_pre_delete.?);
+    try testing.expectEqual(75.0, epxected_max_post_delete.?);
+}
+
+test "getMin returns null when called on empty tree" {
+    const allocator = testing.allocator;
+    var bst = BinarySearchTree(u128).init(allocator);
+    defer bst.deinit();
+
+    try testing.expectEqual(null, bst.getMin());
+}

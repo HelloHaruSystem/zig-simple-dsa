@@ -480,3 +480,43 @@ test "insertRecursive rejects duplicates" {
 
     try testing.expect(bst.getSize() == 1);
 }
+
+test "deleteIterative basic functionality" {
+    const allocator = testing.allocator;
+    var bst = BinarySearchTree(u16).init(allocator);
+    defer bst.deinit();
+
+    try bst.insertIterative(0);
+    try bst.insertIterative(1);
+
+    const original_size = bst.getSize();
+
+    bst.deleteIterative(0);
+    bst.deleteIterative(1);
+
+    try testing.expect(bst.getSize() != original_size);
+    try testing.expect(bst.getSize() == 0);
+    try testing.expect(!bst.contains(0));
+    try testing.expect(!bst.contains(1));
+    try testing.expect(bst.isEmpty());
+}
+
+test "deleteRecursive basic functionality" {
+    const allocator = testing.allocator;
+    var bst = BinarySearchTree(f128).init(allocator);
+    defer bst.deinit();
+
+    try bst.insertIterative(98765.1234);
+    try bst.insertIterative(-123456.9876);
+
+    const original_size = bst.getSize();
+
+    bst.deleteIterative(98765.1234);
+    bst.deleteIterative(-123456.9876);
+
+    try testing.expect(bst.getSize() != original_size);
+    try testing.expect(bst.getSize() == 0);
+    try testing.expect(!bst.contains(98765.1234));
+    try testing.expect(!bst.contains(-123456.9876));
+    try testing.expect(bst.isEmpty());
+}

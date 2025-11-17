@@ -36,7 +36,7 @@ pub fn BinarySearchTree(comptime T: type) type {
         /// The root node of the Binary Search Tree
         /// This is null when just initialized or empty
         root: ?*Node,
-        /// This size of the Binary Search Tree
+        /// The size of the Binary Search Tree
         /// This field is equal to the number of values inserted into the tree
         size: usize,
 
@@ -656,10 +656,10 @@ test "getMax basic functionality" {
     bst.deleteRecursive(5000.0);
     bst.deleteRecursive(4999.99);
 
-    const epxected_max_post_delete = bst.getMax();
+    const expected_max_post_delete = bst.getMax();
 
     try testing.expectEqual(5000.1, expected_max_pre_delete.?);
-    try testing.expectEqual(527.25, epxected_max_post_delete.?);
+    try testing.expectEqual(527.25, expected_max_post_delete.?);
 }
 
 test "getMax returns null when called on empty tree" {
@@ -680,16 +680,16 @@ test "getMin basic functionality" {
     try bst.insertRecursively(67);
     try bst.insertIterative(12.50);
 
-    const expected_max_pre_delete = bst.getMin();
+    const expected_min_pre_delete = bst.getMin();
 
     bst.deleteIterative(12.50);
     bst.deleteRecursive(45.99);
     bst.deleteIterative(67);
 
-    const epxected_max_post_delete = bst.getMin();
+    const expected_min_post_delete = bst.getMin();
 
-    try testing.expectEqual(12.50, expected_max_pre_delete.?);
-    try testing.expectEqual(75.0, epxected_max_post_delete.?);
+    try testing.expectEqual(12.50, expected_min_pre_delete.?);
+    try testing.expectEqual(75.0, expected_min_post_delete.?);
 }
 
 test "getMin returns null when called on empty tree" {

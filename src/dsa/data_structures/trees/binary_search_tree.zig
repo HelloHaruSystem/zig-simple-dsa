@@ -515,9 +515,8 @@ test "deleteIterative two children case" {
     try bst.insertIterative(90);
 
     const original_size = bst.getSize();
-    try testing.expectEqual(7, original_size);
 
-    // Delete the root (50) which has two children. Successor is 60.
+    // Delete the root (50) which has two children. Successor is 60
     bst.deleteIterative(50);
 
     // In-Order 10, 25, 35, 60, 75, 90
@@ -528,9 +527,10 @@ test "deleteIterative two children case" {
     const output = buffer[0..writer.end];
     const expected = "10\n25\n35\n60\n75\n90\n";
 
+    try testing.expectEqual(7, original_size);
     try testing.expect(bst.getSize() == 6);
     try testing.expect(!bst.contains(50));
-    try testing.expect(bst.contains(60)); // Successor must still be present
+    try testing.expect(bst.contains(60));
     try testing.expectEqualStrings(expected, output);
 }
 
@@ -552,6 +552,39 @@ test "deleteRecursive basic functionality" {
     try testing.expect(!bst.contains(98765.1234));
     try testing.expect(!bst.contains(-123456.9876));
     try testing.expect(bst.isEmpty());
+}
+
+test "deleteRecursive two children case" {
+    const allocator = testing.allocator;
+    var bst = BinarySearchTree(i32).init(allocator);
+    defer bst.deinit();
+
+    try bst.insertRecursively(50);
+    try bst.insertRecursively(25);
+    try bst.insertRecursively(75);
+    try bst.insertRecursively(10);
+    try bst.insertRecursively(35);
+    try bst.insertRecursively(60); // In-order Successor of 50
+    try bst.insertRecursively(90);
+
+    const original_size = bst.getSize();
+
+    // Delete the root (50) which has two children. Successor is 60.
+    bst.deleteRecursive(50);
+
+    // In-Order 10, 25, 35, 60, 75, 90
+    var buffer: [512]u8 = undefined;
+    var writer: std.Io.Writer = .fixed(&buffer);
+
+    try tree_algos.printInOrderRecursive(&writer, BinarySearchTree(i32).Node, bst.root);
+    const output = buffer[0..writer.end];
+    const expected = "10\n25\n35\n60\n75\n90\n";
+
+    try testing.expectEqual(7, original_size);
+    try testing.expect(bst.getSize() == 6);
+    try testing.expect(!bst.contains(50));
+    try testing.expect(bst.contains(60));
+    try testing.expectEqualStrings(expected, output);
 }
 
 test "getSize basic functionality" {

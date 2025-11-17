@@ -107,6 +107,8 @@ pub fn BinarySearchTree(comptime T: type) type {
         }
 
         /// Deletes a value from the binary search tree
+        /// Time complexity worst case O(n)
+        /// Time complexity average case O(log n)
         pub fn deleteIterative(self: *Self, value: T) void {
             if (self.root == null) return;
 
@@ -194,6 +196,8 @@ pub fn BinarySearchTree(comptime T: type) type {
 
         /// Deletes a value from the binary search tree
         /// Using recursion
+        /// Time complexity worst case O(n)
+        /// Time complexity average case O(log n)
         pub fn deleteRecursive(self: *Self, value: T) void {
             self.root = self.deleteRecursiveHelper(self.root, value);
         }
@@ -435,6 +439,44 @@ test "insertIterative rejects duplicates" {
     try testing.expect(bst.getSize() == 1);
 
     try bst.insertIterative(10);
+
+    try testing.expect(bst.getSize() == 1);
+}
+
+test "insertRecursive basic functionality" {
+    const allocator = testing.allocator;
+    var bst = BinarySearchTree(i64).init(allocator);
+    defer bst.deinit();
+
+    for (1..6) |i| {
+        try bst.insertRecursively(@as(i64, @intCast(i)));
+    }
+
+    var buffer: [512]u8 = undefined;
+    var writer: std.Io.Writer = .fixed(&buffer);
+    try tree_algos.printPreOrderRecursive(&writer, BinarySearchTree(i64).Node, bst.root);
+    const output = buffer[0..writer.end];
+    // pre order 1, 2, 3, 4, 5
+    const expected = "1\n2\n3\n4\n5\n";
+
+    try testing.expectEqualStrings(expected, output);
+    try testing.expect(bst.getSize() == 5);
+    try testing.expect(!bst.isEmpty());
+
+    for (0..bst.getSize()) |i| {
+        try testing.expect(bst.contains(@as(i64, @intCast(i + 1))));
+    }
+}
+
+test "insertRecursive rejects duplicates" {
+    const allocator = testing.allocator;
+    var bst = BinarySearchTree(u8).init(allocator);
+    defer bst.deinit();
+
+    try bst.insertRecursively(10);
+    try testing.expect(bst.getSize() == 1);
+
+    try bst.insertRecursively(10);
 
     try testing.expect(bst.getSize() == 1);
 }

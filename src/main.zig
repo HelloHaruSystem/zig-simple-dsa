@@ -10,22 +10,4 @@ pub fn main() !void {
 
     // Don't forget to flush
     try stdout.flush();
-
-    // testing trees
-    const Bst = dsa.trees.BinarySearchTree;
-    const tree_algos = dsa.algorithms.TreeAlgos;
-
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    defer _ = gpa.deinit();
-    const allocator = gpa.allocator();
-
-    var bst = Bst(i32).init(allocator);
-    defer bst.deinit();
-
-    try bst.insertRecursively(8);
-    try bst.insertIterative(4);
-    try bst.insertRecursively(16);
-
-    // should print 4 -> 16 -> 8
-    try tree_algos.DepthFirstSearch.printPostOrderRecursive(stdout, dsa.trees.BinarySearchTree(i32).Node, bst.root);
 }

@@ -412,7 +412,6 @@ test "insertIterative basic functionality" {
     try bst.insertIterative(128);
     try bst.insertIterative(32);
     try bst.insertIterative(4);
-    try bst.insertIterative(128);
 
     var buffer: [512]u8 = undefined;
     var writer: std.Io.Writer = .fixed(&buffer);
@@ -425,4 +424,17 @@ test "insertIterative basic functionality" {
     try testing.expect(bst.getSize() == 5);
     try testing.expect(!bst.isEmpty());
     try testing.expect(bst.contains(32));
+}
+
+test "insertIterative rejects duplicates" {
+    const allocator = testing.allocator;
+    var bst = BinarySearchTree(u8).init(allocator);
+    defer bst.deinit();
+
+    try bst.insertIterative(10);
+    try testing.expect(bst.getSize() == 1);
+
+    try bst.insertIterative(10);
+
+    try testing.expect(bst.getSize() == 1);
 }

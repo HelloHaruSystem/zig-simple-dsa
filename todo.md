@@ -18,7 +18,6 @@
 - [ ] Custom error for better error handling when using the data structures
 
 ### Potential stuff i wanna do for trees
-- Self-balancing (AVL rotations!)
-- Red-Black trees (color rules!)
+- Self-balancing (AVL rotations)
+- Red-Black trees (color rules)
 - Tree metrics (height, balance factor)
-- Do things iteratively and recursively

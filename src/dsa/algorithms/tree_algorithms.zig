@@ -157,7 +157,7 @@ pub fn breadthFirstSearch(allocator: std.mem.Allocator, writer: *std.Io.Writer, 
     while (!queue.isEmpty()) {
         const current_node = queue.dequeue() orelse unreachable;
         // print
-        printValue(writer, NodeType, current_node);
+        try printValue(writer, NodeType, current_node);
         // enqueue children
         if (current_node.left) |left| {
             try queue.enqueue(left);
@@ -194,7 +194,7 @@ fn breadthFirstSearchRecursiveHelper(writer: *std.Io.Writer, comptime NodeType: 
     const current_node = queue.dequeue() orelse unreachable;
 
     // Print
-    printValue(writer, NodeType, current_node);
+    try printValue(writer, NodeType, current_node);
     // Enqueue children
     if (current_node.left) |left| {
         try queue.enqueue(left);
@@ -389,6 +389,78 @@ test "printPostOrderIterative basic functionality" {
 
     // Post-order: 12.50, 67, 75.0, 45.99, 39.95, 4999.99, 5000.01, 5000.1, 5000.0, 527.25
     const expected = "12.5\n67\n75\n45.99\n39.95\n4999.99\n5000.01\n5000.1\n5000\n527.25\n";
+
+    try testing.expectEqualStrings(expected, output);
+}
+
+test "breadthFirstSearch basic functionality" {
+    const allocator = testing.allocator;
+    var bst = Bst(u8).init(allocator);
+    defer bst.deinit();
+
+    try bst.insertIterative(50);
+    try bst.insertIterative(25);
+    try bst.insertIterative(75);
+    try bst.insertRecursively(12);
+    try bst.insertRecursively(37);
+    try bst.insertRecursively(62);
+    try bst.insertRecursively(87);
+
+    var buffer: [1024]u8 = undefined;
+    var writer: std.Io.Writer = .fixed(&buffer);
+
+    try breadthFirstSearch(allocator, &writer, Bst(u8).Node, bst.root);
+
+    const output = buffer[0..writer.end];
+
+    // Breadth First Search: 50, 25, 75, 12, 37, 62, 87
+    const expected = "50\n25\n75\n12\n37\n62\n87\n";
+
+    try testing.expectEqualStrings(expected, output);
+}
+
+test "breadthFirstSearch empty tree" {
+    const allocator = testing.allocator;
+    var bst = Bst(u8).init(allocator);
+    defer bst.deinit();
+
+    var buffer: [1024]u8 = undefined;
+    var writer: std.Io.Writer = .fixed(&buffer);
+
+    try breadthFirstSearch(allocator, &writer, Bst(u8).Node, bst.root);
+
+    const output = buffer[0..writer.end];
+
+    // Empty tree should produce no output
+    const expected = "";
+
+    try testing.expectEqualStrings(expected, output);
+}
+
+test "breadthFirstSearchRecursive uneven tree heavy left" {
+    const allocator = testing.allocator;
+    var bst = Bst(u8).init(allocator);
+    defer bst.deinit();
+
+    try bst.insertIterative(50);
+    try bst.insertIterative(20);
+    try bst.insertIterative(70);
+    try bst.insertRecursively(10);
+    try bst.insertRecursively(30);
+    try bst.insertRecursively(5);
+    try bst.insertRecursively(15);
+    try bst.insertRecursively(25);
+    try bst.insertRecursively(35);
+
+    var buffer: [1024]u8 = undefined;
+    var writer: std.Io.Writer = .fixed(&buffer);
+
+    try breadthFirstSearchRecursive(allocator, &writer, Bst(u8).Node, bst.root);
+
+    const output = buffer[0..writer.end];
+
+    // Breadth First Search: 50, 20, 70, 10, 30, 5, 15, 25, 35
+    const expected = "50\n20\n70\n10\n30\n5\n15\n25\n35\n";
 
     try testing.expectEqualStrings(expected, output);
 }

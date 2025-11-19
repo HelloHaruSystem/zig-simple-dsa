@@ -1,5 +1,6 @@
 const std = @import("std");
 const Stack = @import("../data_structures/stacks/stack.zig").Stack;
+const Queue = @import("../data_structures/queues/queue.zig").Queue;
 const Bst = @import("../data_structures/trees/binary_search_tree.zig").BinarySearchTree;
 const testing = std.testing;
 
@@ -138,31 +139,94 @@ pub const DepthFirstSearch = struct {
             try printValue(writer, NodeType, current);
         }
     }
-
-    // helper functions
-
-    /// Helper function to validate the node type
-    /// These functions only works on binary trees
-    /// So this functions job is to make sure it has a left and right property
-    fn validNode(comptime NodeType: type) void {
-        // TODO: Implement proper error unions to use here
-        if (!@hasField(NodeType, "value")) {
-            @compileError("NodeType must have a 'value' field");
-        }
-        if (!@hasField(NodeType, "left")) {
-            @compileError("NodeType must have a 'left' field");
-        }
-        if (!@hasField(NodeType, "right")) {
-            @compileError("NodeType must have a 'right' field");
-        }
-    }
-
-    /// Helper function to print the value that a node holds
-    fn printValue(writer: *std.Io.Writer, comptime NodeType: type, node: *NodeType) !void {
-        try writer.print("{any}\n", .{node.value});
-        try writer.flush();
-    }
 };
+
+/// Prints out the values of the tree using breadth first search
+pub fn breadthFirstSearch(allocator: std.mem.Allocator, writer: *std.Io.Writer, comptime NodeType: type, node: ?*NodeType) !void {
+    validNode(NodeType);
+
+    if (node == null) return;
+
+    var queue = Queue(*NodeType).init(allocator);
+    defer queue.deinit();
+
+    // Enqueue root
+    // safe to unwrap because of the null check above
+    try queue.enqueue(node.?);
+
+    while (!queue.isEmpty()) {
+        const current_node = queue.dequeue() orelse unreachable;
+        // print
+        printValue(writer, NodeType, current_node);
+        // enqueue children
+        if (current_node.left) |left| {
+            try queue.enqueue(left);
+        }
+
+        if (current_node.right) |right| {
+            try queue.enqueue(right);
+        }
+    }
+}
+
+pub fn breadthFirstSearchRecursive(allocator: std.mem.Allocator, writer: *std.Io.Writer, comptime NodeType: type, node: ?*NodeType) !void {
+    if (node == null) return;
+
+    var queue = Queue(*NodeType).init(allocator);
+    defer queue.deinit();
+
+    // Safe to unwrap because of the null check above
+    try queue.enqueue(node.?);
+
+    try breadthFirstSearchRecursiveHelper(writer, NodeType, &queue);
+}
+
+fn breadthFirstSearchRecursiveHelper(writer: *std.Io.Writer, comptime NodeType: type, queue: *Queue(*NodeType)) !void {
+    validNode(NodeType);
+
+    // Base case
+    if (queue.isEmpty()) return;
+
+    const current_node = queue.dequeue() orelse unreachable;
+
+    // Print
+    printValue(writer, NodeType, current_node);
+    // Enqueue children
+    if (current_node.left) |left| {
+        try queue.enqueue(left);
+    }
+
+    if (current_node.right) |right| {
+        try queue.enqueue(right);
+    }
+
+    // Recurse with updated queue
+    try breadthFirstSearchRecursiveHelper(writer, NodeType, queue);
+}
+
+// helper functions
+
+/// Helper function to validate the node type
+/// These functions only works on binary trees
+/// So this functions job is to make sure it has a left and right property
+fn validNode(comptime NodeType: type) void {
+    // TODO: Implement proper error unions to use here
+    if (!@hasField(NodeType, "value")) {
+        @compileError("NodeType must have a 'value' field");
+    }
+    if (!@hasField(NodeType, "left")) {
+        @compileError("NodeType must have a 'left' field");
+    }
+    if (!@hasField(NodeType, "right")) {
+        @compileError("NodeType must have a 'right' field");
+    }
+}
+
+/// Helper function to print the value that a node holds
+fn printValue(writer: *std.Io.Writer, comptime NodeType: type, node: *NodeType) !void {
+    try writer.print("{any}\n", .{node.value});
+    try writer.flush();
+}
 
 // tests
 test "printPreOrderRecursive basic functionality" {

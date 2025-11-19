@@ -169,6 +169,7 @@ pub fn breadthFirstSearch(allocator: std.mem.Allocator, writer: *std.Io.Writer, 
     }
 }
 
+/// Prints out the values of the tree using breadth first search recursively
 pub fn breadthFirstSearchRecursive(allocator: std.mem.Allocator, writer: *std.Io.Writer, comptime NodeType: type, node: ?*NodeType) !void {
     if (node == null) return;
 
@@ -181,6 +182,9 @@ pub fn breadthFirstSearchRecursive(allocator: std.mem.Allocator, writer: *std.Io
     try breadthFirstSearchRecursiveHelper(writer, NodeType, &queue);
 }
 
+// helper functions
+
+/// Recursive helper function for breadthFirstSearchRecursive()
 fn breadthFirstSearchRecursiveHelper(writer: *std.Io.Writer, comptime NodeType: type, queue: *Queue(*NodeType)) !void {
     validNode(NodeType);
 
@@ -203,8 +207,6 @@ fn breadthFirstSearchRecursiveHelper(writer: *std.Io.Writer, comptime NodeType: 
     // Recurse with updated queue
     try breadthFirstSearchRecursiveHelper(writer, NodeType, queue);
 }
-
-// helper functions
 
 /// Helper function to validate the node type
 /// These functions only works on binary trees

@@ -21,3 +21,4 @@
 - Self-balancing (AVL rotations)
 - Red-Black trees (color rules)
 - Tree metrics (height, balance factor)
+- Priority queues

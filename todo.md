@@ -17,8 +17,14 @@
 - [ ] Make linked list iterators implementations more Zig idiomatic
 - [ ] Custom error for better error handling when using the data structures
 
-### Potential stuff i wanna do for trees
+### Potential stuff i wanna add in the future
 - Self-balancing (AVL rotations)
 - Red-Black trees (color rules)
 - Tree metrics (height, balance factor)
 - Priority queues
+- Heapsort
+- n-ary tree
+- Segment tree
+- Tries (prefix tree or radix tree)
+- Disjoint-set
+- Graphs

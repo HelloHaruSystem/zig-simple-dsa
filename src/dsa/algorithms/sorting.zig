@@ -95,6 +95,49 @@ pub const Sorting = struct {
             k += 1;
         }
     }
+
+    /// Quick sort algorithm (Hoare partition scheme)
+    /// T must support < or >
+    /// Sorts the array in place
+    /// Time complexity average O(n log n), worst case O(n^2)
+    /// space complexity O(log n) because of the recursion stack
+    pub fn quickSort(comptime T: type, arr: []T) void {
+        if (arr.len <= 1) return;
+        quickSortImpl(T, arr, 0, arr.len - 1);
+    }
+
+    fn quickSortImpl(comptime T: type, arr: []T, low: usize, high: usize) void {
+        if (low >= high) return;
+
+        const p: usize = partition(T, arr, low, high);
+        if (p > 0) quickSortImpl(T, arr, low, p);
+        quickSortImpl(T, arr, p + 1, high);
+    }
+
+    /// Helper function for quick sort
+    fn partition(comptime T: type, arr: []T, low: usize, high: usize) usize {
+        const pivot: T = arr[low];
+        var i: usize = low;
+        var j: usize = high;
+
+        while (true) {
+            // move i fowards while arr[i] < pivot
+            while (arr[i] < pivot) : (i += 1) {}
+            // move j backwards while arr[j] > pivot
+            while (arr[j] > pivot) : (j -= 1) {}
+
+            // if the indices cross then the partition is done
+            if (i >= j) {
+                return j;
+            }
+
+            // swap swap the elements at the left and right indices
+            // then move the pointers to avoid infinit loop
+            std.mem.swap(T, &arr[i], &arr[j]);
+            i += 1;
+            j -= 1;
+        }
+    }
 };
 
 test "bubbleSort basic functionality" {
@@ -191,4 +234,48 @@ test "merge sort failing allocator" {
     var array = [_]u8{ 7, 43, 24, 1, 9, 45 };
 
     try testing.expectError(error.OutOfMemory, Sorting.mergeSort(allocator, u8, &array));
+}
+
+test "quickSort basic functionality" {
+    var arr = [_]i32{ 64, 34, 25, 12, 22, 11, 90 };
+    const expected = [_]i32{ 11, 12, 22, 25, 34, 64, 90 };
+
+    Sorting.quickSort(i32, &arr);
+
+    try testing.expectEqualSlices(i32, &expected, &arr);
+}
+
+test "quickSort empty array" {
+    var arr = [_]i32{};
+
+    Sorting.quickSort(i32, &arr);
+
+    try testing.expectEqualSlices(i32, &[_]i32{}, &arr);
+}
+
+test "quickSort single element" {
+    var arr = [_]i32{42};
+    const expected = [_]i32{42};
+
+    Sorting.quickSort(i32, &arr);
+
+    try testing.expectEqualSlices(i32, &expected, &arr);
+}
+
+test "quickSort already sorted" {
+    var arr = [_]i32{ 1, 2, 3, 4, 5 };
+    const expected = [_]i32{ 1, 2, 3, 4, 5 };
+
+    Sorting.quickSort(i32, &arr);
+
+    try testing.expectEqualSlices(i32, &expected, &arr);
+}
+
+test "quickSort with duplicates" {
+    var arr = [_]i32{ 3, 1, 3, 2, 1 };
+    const expected = [_]i32{ 1, 1, 2, 3, 3 };
+
+    Sorting.quickSort(i32, &arr);
+
+    try testing.expectEqualSlices(i32, &expected, &arr);
 }

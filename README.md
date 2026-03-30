@@ -19,7 +19,7 @@ Practicing data structures and algorithms while getting comfortable with Zig syn
 
 **Algorithms**
 - [x] Linear & Binary Search
-- [ ] Sorting (Bubble, Merge, Quick)
+- [x] Sorting (Bubble, Merge, Quick)
 - [x] Tree Traversals (DFS, BFS)
 - [ ] Basic Dynamic Programming
 

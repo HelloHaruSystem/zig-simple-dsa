@@ -279,3 +279,75 @@ test "quickSort with duplicates" {
 
     try testing.expectEqualSlices(i32, &expected, &arr);
 }
+
+test "quickSort negative numbers" {
+    var arr = [_]i32{ -3, -1, -7, -4, -2 };
+    const expected = [_]i32{ -7, -4, -3, -2, -1 };
+
+    Sorting.quickSort(i32, &arr);
+
+    try testing.expectEqualSlices(i32, &expected, &arr);
+}
+
+test "quickSort mixed positive and negative" {
+    var arr = [_]i32{ 3, -1, 0, -7, 4, -2 };
+    const expected = [_]i32{ -7, -2, -1, 0, 3, 4 };
+
+    Sorting.quickSort(i32, &arr);
+
+    try testing.expectEqualSlices(i32, &expected, &arr);
+}
+
+test "quickSort all same elements" {
+    var arr = [_]i32{ 5, 5, 5, 5, 5 };
+    const expected = [_]i32{ 5, 5, 5, 5, 5 };
+
+    Sorting.quickSort(i32, &arr);
+
+    try testing.expectEqualSlices(i32, &expected, &arr);
+}
+
+test "quickSort reverse sorted" {
+    var arr = [_]i32{ 5, 4, 3, 2, 1 };
+    const expected = [_]i32{ 1, 2, 3, 4, 5 };
+
+    Sorting.quickSort(i32, &arr);
+
+    try testing.expectEqualSlices(i32, &expected, &arr);
+}
+
+test "quickSort two elements" {
+    var arr = [_]i32{ 2, 1 };
+    const expected = [_]i32{ 1, 2 };
+
+    Sorting.quickSort(i32, &arr);
+
+    try testing.expectEqualSlices(i32, &expected, &arr);
+}
+
+test "quickSort two elements already sorted" {
+    var arr = [_]i32{ 1, 2 };
+    const expected = [_]i32{ 1, 2 };
+
+    Sorting.quickSort(i32, &arr);
+
+    try testing.expectEqualSlices(i32, &expected, &arr);
+}
+
+test "quickSort pivot is largest element" {
+    var arr = [_]i32{ 1, 2, 3, 4, 5, 99 };
+    const expected = [_]i32{ 1, 2, 3, 4, 5, 99 };
+
+    Sorting.quickSort(i32, &arr);
+
+    try testing.expectEqualSlices(i32, &expected, &arr);
+}
+
+test "quickSort pivot is smallest element" {
+    var arr = [_]i32{ 1, 5, 4, 3, 2 };
+    const expected = [_]i32{ 1, 2, 3, 4, 5 };
+
+    Sorting.quickSort(i32, &arr);
+
+    try testing.expectEqualSlices(i32, &expected, &arr);
+}
